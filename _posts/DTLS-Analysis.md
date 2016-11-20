@@ -1,7 +1,16 @@
 ---
 published: false
 ---
-# 通过mbedTLS实现来了解DTLS握手 <br> (Understand the DTLS handshake by look into mbedTLS) #
+---
+title: 透过mbedTLS了解DTLS握手协议
+date: {}
+tags:
+- DTLS
+- mbedTLS
+- handshake
+published: true
+---
+# (Understand the DTLS handshake by look into mbedTLS) #
 
 ## DTLS简介 ##
 
