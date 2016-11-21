@@ -2,9 +2,9 @@
 title: 透过mbedTLS了解DTLS握手协议
 date: {}
 tags:
-- DTLS
-- mbedTLS
-- handshake
+  - DTLS
+  - mbedTLS
+  - handshake
 published: true
 ---
 # (Understand the DTLS handshake by look into mbedTLS) #
@@ -79,6 +79,7 @@ _Wireshark抓包结果：_
 ## 参考文献 ##
 - [Keyless SSL: The Nitty Gritty Technical Details](https://blog.cloudflare.com/keyless-ssl-the-nitty-gritty-technical-details/)
 - [DTLS协议中client/server的认证过程和密钥协商过程](https://segmentfault.com/a/1190000006233845)
+- [大型网站的HTTPS实践（一）---HTTPS协议和原理](http://blog.csdn.net/luocn99/article/details/45460673)
 - [X.509 wiki](https://en.wikipedia.org/wiki/X.509)
 - [mbedTLS Web](https://tls.mbed.org/)
 - [RF4347](https://tools.ietf.org/html/rfc4347#section-4)
