@@ -37,9 +37,47 @@ DTLS握手协议和TLS类似。DTLS协议在UDP之上实现了客户机与服务
 以及我画的简易握手流程图：
 ![](\DTLS-Analysis\dtls-handshake.png)
 
-我们这里只讨论DH的握手协议，一般来说DH由于不需要传输Premaster Key，会比RSA的方式更安全。
+我们这里只讨论DH的握手协议，一般来说DH由于不需要传输Premaster Key，会比RSA的方式更安全。另外mbedTLS里的DTLS测试程序也使用了DH的握手协议。
 
 ## 通过mbedTLS来分析 ##
+
+mbedTLS（前身PolarSSL）是面向嵌入式系统，实现了的一套易用的加解密算法和SSL/TLS库，并且mbedTLS系统开销极小，对于系统资源要求不高。mbedTLS是使用Apache 2.0许可证的开源项目，使得用户既可以讲mbedTLS使用在开源项目中，也可以应用于商业项目。使用mbedTLS的项目很多，例如Monkey HTTP Daemon，LinkSYS路由器。
+
+我们在这里简单的利用mbedTLS自带的dtls_client/dtls_server的测试程序来分析握手协议：
+1.在mbedTLS编译阶段，提升DEBUG LEVEL。利用mbedTLS的调试信息来理解程序流程
+2.在Linux上跑dtls测试程序（localhost loopback），并且抓包
+
+首先把mbedTLS下载下来：
+``` bash
+$git clone https://github.com/ARMmbed/mbedtls
+```
+
+然后在program/dtls_client.c, dtls_server.c里，调下DEBUG_LEVEL，然后将my_debug里加上时间戳信息，方便对比客户端和服务端的流程：
+``` C
+#define DEBUG_LEVEL 100
+
+static void my_debug( void *ctx, int level,
+                      const char *file, int line,
+                      const char *str )
+{
+    struct timeval tv;
+
+    ((void) level);
+
+    gettimeofday(&tv, NULL);
+    //strftime(outstr, sizeof(outstr), "%H:%M:%S", tmp);
+
+    mbedtls_fprintf( (FILE *) ctx, "[%06ld.%ld]%s:%04d: %s", tv.tv_sec, tv.tv_usec, file, line, str );
+    fflush(  (FILE *) ctx  );
+}
+```
+
+最后在Linux下直接make,DTLS的测试客户和服务端都会在program/下编译出来。然后打开wireshark之类的抓包工具，对本地网卡进行抓包。最后先跑server，后跑client。在抓包结束后，加dtls的display filter既可以：
+
+_Wireshark抓包结果：_
+![](\DTLS-Analysis\dtls-flow-capture.png)
+
+
 
 ## 参考文献 ##
 - [Keyless SSL: The Nitty Gritty Technical Details](https://blog.cloudflare.com/keyless-ssl-the-nitty-gritty-technical-details/)
