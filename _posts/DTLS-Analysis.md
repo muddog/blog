@@ -27,14 +27,14 @@ published: true
 
 DTLS握手协议和TLS类似。DTLS协议在UDP之上实现了客户机与服务器双方的握手连接，并且在握手过程中通过使用RSA或者DH（Diffie-Hellman）实现会话密钥的建立。它利用cookie验证机制和证书实现了通信双方的身份认证，并且用在报文段头部加上序号，缓存乱序到达的报文段和重传机制实现了可靠传送。在握手完成后，通信双方就可以利用握手阶段协商好的会话密钥来对应用数据进行加解密。
 
-放上我觉得很直观的两种握手（RSA/DH）过程的示意图帮助理解（TLS的，非DTLS）：
-![](https://blog.cloudflare.com/content/images/2014/Sep/ssl_handshake_rsa.jpg)
-![](https://blog.cloudflare.com/content/images/2014/Sep/ssl_handshake_diffie_hellman.jpg)
-
-以及我画的简易握手流程图：
+简易握手流程图：
 ![](\DTLS-Analysis\dtls-handshake.png)
 
-我们这里只讨论DH的握手协议，一般来说DH由于不需要传输Premaster Key，会比RSA的方式更安全。另外mbedTLS里的DTLS测试程序也使用了DH的握手协议。
+从流程图上看，有(1)(3)两个"Client Hello"请求，他两之间的区别是第二个"Client Hello"包含有(2)"Hello Verify Request"里Server发来的Cookie。要使得DTLS握手正真开始，Server必须要判断发送请求的Client是有效的，正常的客户端。通过这样的Cookie交互，可以很大程度上保护Server不受DoS的攻击。如果不这么做，Server会在收到每个客户请求后返回一个体积大很多的证书给被攻击者，超大量证书有可能造成被攻击者的瘫痪。当首次建立连接时，(1)请求包中的cookie为空，Server根据Client的源IP地址通过哈希方法随机生成一个cookie，并填入(2)"Hello Verify Request"包中发送给Client。Client收到Cookie后，再次发送带有该Cookie的"Client Hello"包(3)，Server收到该包后便检验报文段里面的cookie值和之前发给该Client的Cookie值是否完全相同，若是，则通过Cookie验证，继续进行握手连接；若不是，则拒绝建立连接。
+所以说(1)(2)步骤只在第一次连接时发生，之后再Cookie有效的情况下，DTLS握手从步骤(3)开始
+
+
+
 
 ## 通过mbedTLS来分析 ##
 
