@@ -1,5 +1,5 @@
 ---
-title: 透过mbedTLS了解DTLS握手协议
+title: 借助mbedTLS了解DTLS握手协议
 date: {}
 tags:
   - DTLS
@@ -7,7 +7,7 @@ tags:
   - handshake
 published: true
 ---
-# (Understand the DTLS handshake by look into mbedTLS) #
+# (Understand the DTLS handshake by mbedTLS) #
 
 ## DTLS简介 ##
 
@@ -23,20 +23,7 @@ published: true
 
 如果你已经很熟悉TLS，那么看到这里后就请忽略此文:)
 
-## DTLS握手协议 ##
-
-DTLS握手协议和TLS类似。DTLS协议在UDP之上实现了客户机与服务器双方的握手连接，并且在握手过程中通过使用RSA或者DH（Diffie-Hellman）实现会话密钥的建立。它利用cookie验证机制和证书实现了通信双方的身份认证，并且用在报文段头部加上序号，缓存乱序到达的报文段和重传机制实现了可靠传送。在握手完成后，通信双方就可以利用握手阶段协商好的会话密钥来对应用数据进行加解密。
-
-简易握手流程图：
-![](\DTLS-Analysis\dtls-handshake.png)
-
-从流程图上看，有(1)(3)两个"Client Hello"请求，他两之间的区别是第二个"Client Hello"包含有(2)"Hello Verify Request"里Server发来的Cookie。要使得DTLS握手正真开始，Server必须要判断发送请求的Client是有效的，正常的客户端。通过这样的Cookie交互，可以很大程度上保护Server不受DoS的攻击。如果不这么做，Server会在收到每个客户请求后返回一个体积大很多的证书给被攻击者，超大量证书有可能造成被攻击者的瘫痪。当首次建立连接时，(1)请求包中的cookie为空，Server根据Client的源IP地址通过哈希方法随机生成一个cookie，并填入(2)"Hello Verify Request"包中发送给Client。Client收到Cookie后，再次发送带有该Cookie的"Client Hello"包(3)，Server收到该包后便检验报文段里面的cookie值和之前发给该Client的Cookie值是否完全相同，若是，则通过Cookie验证，继续进行握手连接；若不是，则拒绝建立连接。
-所以说(1)(2)步骤只在第一次连接时发生，之后再Cookie有效的情况下，DTLS握手从步骤(3)开始
-
-
-
-
-## 通过mbedTLS来分析 ##
+## 如何借助mbedTLS来分析握手协议 ##
 
 mbedTLS（前身PolarSSL）是面向嵌入式系统，实现了的一套易用的加解密算法和SSL/TLS库，并且mbedTLS系统开销极小，对于系统资源要求不高。mbedTLS是使用Apache 2.0许可证的开源项目，使得用户既可以讲mbedTLS使用在开源项目中，也可以应用于商业项目。使用mbedTLS的项目很多，例如Monkey HTTP Daemon，LinkSYS路由器。
 
@@ -73,6 +60,29 @@ static void my_debug( void *ctx, int level,
 
 _Wireshark抓包结果：_
 ![](\DTLS-Analysis\dtls-flow-capture.png)
+
+有了TLS协议栈的调试信息，Wireshark的实际的抓包数据再加上源代码，我们就很容易来分析DTLS的握手协议。
+
+
+## DTLS握手协议分析 ##
+
+DTLS握手协议和TLS类似。DTLS协议在UDP之上实现了客户机与服务器双方的握手连接，并且在握手过程中通过使用RSA或者DH（Diffie-Hellman）实现会话密钥的建立。它利用cookie验证机制和证书实现了通信双方的身份认证，并且用在报文段头部加上序号，缓存乱序到达的报文段和重传机制实现了可靠传送。在握手完成后，通信双方就可以利用握手阶段协商好的会话密钥来对应用数据进行加解密。
+
+简易握手流程图：
+![](\DTLS-Analysis\dtls-handshake.png)
+
+从流程图上看，有(1)(3)两个"Client Hello"请求，他两之间的区别是第二个"Client Hello"包含有(2)"Hello Verify Request"里Server发来的Cookie。要使得DTLS握手正真开始，Server必须要判断发送请求的Client是有效的，正常的客户端。通过这样的Cookie交互，可以很大程度上保护Server不受DoS的攻击。如果不这么做，Server会在收到每个客户请求后返回一个体积大很多的证书给被攻击者，超大量证书有可能造成被攻击者的瘫痪。当首次建立连接时，(1)请求包中的cookie为空，Server根据Client的源IP地址通过哈希方法随机生成一个cookie，并填入(2)"Hello Verify Request"包中发送给Client。Client收到Cookie后，再次发送带有该Cookie的"Client Hello"包(3)，Server收到该包后便检验报文段里面的cookie值和之前发给该Client的Cookie值是否完全相同，若是，则通过Cookie验证，继续进行握手连接；若不是，则拒绝建立连接。所以说(1)(2)步骤只在第一次连接时发生，之后在Cookie有效的情况下，DTLS握手从步骤(3)开始。
+
+(3)"Client Hello"报文内容主要包含：
+1. Random 32字节随机数，前4字节为当前时间+28字节随机数
+2. Session ID
+3. Cookie
+4. Cipher Suite
+5. Compression methods
+
+(4)"Server Hello"报文内容主要包括：
+
+
 
 
 
