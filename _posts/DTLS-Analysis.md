@@ -112,3 +112,4 @@ DTLS握手协议和TLS类似。DTLS协议在UDP之上实现了客户机与服务
 - [X.509 wiki](https://en.wikipedia.org/wiki/X.509)
 - [mbedTLS Web](https://tls.mbed.org/)
 - [RF4347](https://tools.ietf.org/html/rfc4347#section-4)
+- [RF4492](https://tools.ietf.org/html/rfc4492#section-2)
