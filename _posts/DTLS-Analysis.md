@@ -68,7 +68,7 @@ DTLS的测试客户和服务端都会在program/下编译出来。
 ### 抓包 ###
 打开wireshark之类的抓包工具，对本地网卡进行抓包。先跑server，后跑client。在抓包结束后，加dtls的display filter既可以：
 
-_Wireshark抓包结果：_
+_Wireshark抓包 [下载](\DTLS-Analysis\dtls.pcapng) 截图：_
 ![](\DTLS-Analysis\dtls-flow-capture.png)
 
 有了TLS协议栈的调试信息，Wireshark的实际的抓包数据再加上源代码，我们就很容易来分析DTLS的握手协议。
@@ -103,7 +103,7 @@ DTLS握手协议和TLS类似。DTLS协议在UDP之上实现了客户机与服务
 
 **(6)"Server Key Exchange"**是Session Key协商的重要一步**ssl_write_server_key_exchange()**，测试程序中使用了ECDHE_RSA的协商方式。服务端首先要将在**(3)"Client Hello"**阶段和客户端协商使用的EC曲线类型找出来，这里协商的曲线类型是secp512r1(0x0019)。利用该曲线类型，加载对应于该曲线的参数p,b,G(x,y),n （服务端和客户端参数相同，参考：library/ecp_curves.c）。调用**mbedtls_ecdh_gen_public()**，首先生成一个随机数私钥a（范围[1, n-1]），然后计算Qs=aG，产生ECDHE的Public Key Qs，再用服务端的私钥（和localhost证书中的公钥配对的）对Qs做签名（SHA512做哈希，RSA加密）。最后将曲线类型，公钥Qs，签名算法及签名写入**(6)**的报文中，发送给客户端。由于ECDHE(Elliptic curve Diffie–Hellman)算法较为复杂，我也不是非常理解，具体可以参考：
 [WikiPage](https://en.wikipedia.org/wiki/Elliptic_curve_Diffie%E2%80%93Hellman)
-我们在这里就不深入讨论算法了。总之，ECDHE算法很快，而且不需要暴露私钥a，后面客户端也会做同样的操作，生成自己的私钥b,Qc。双方交换Q后，可以计算的到相同的预主密码（premaster secret）:bQs=baG=abG=aQc。之后双方就可以用这个abG预主密码和之前(3)(4)报文中的客户端、服务端的Random来生成对称密钥Session Key（master secret）。预主密码如何生成密钥，可以参考**mbedtls_ssl_derive_keys()**
+我们在这里就不深入讨论算法了。总之，ECDHE算法很快，而且不需要暴露预主密码（premaster secret），后面客户端也会做同样的操作，生成自己的私钥b,Qc。双方交换Q后，可以计算的到相同的预主密码:bQs=baG=abG=aQc。之后双方就可以用这个abG预主密码和之前(3)(4)报文中的客户端、服务端的Random来生成对称密钥Session Key（master secret）。预主密码如何生成密钥，可以参考**mbedtls_ssl_derive_keys()**：
 ```
 master = PRF( premaster, "master secret", randbytes )[0..47]
 ```
@@ -111,11 +111,11 @@ master = PRF( premaster, "master secret", randbytes )[0..47]
 
 **(7)"Server Hello Done"**会紧接着(6)发送，内容很简单，标示了handshake type 14,，告诉客户端Hello阶段结束。
 
-**(8)"Client Key Exchange"**客户端在收到(6)报文后，获取服务端发送过来的EC曲线类型和Qs，并且使用服务端一样的流程生成私钥b，计算公钥Qc=bG，将Qc放入该报文，并发送给服务端。此时不需要再做签名。
+**(8)"Client Key Exchange"**客户端在收到(6)报文后，获取服务端发送过来的EC曲线类型和Qs，使用和服务端一样的流程生成私钥b，计算公钥Qc=bG，将Qc放入该报文，并发送给服务端。此时不需要再做签名。
 
 **(9)"Change Cipher Spec"**客户端接着发送该报文，告诉服务端Session Key我已经生成，我们可以用密钥开始加密通讯了。
 
-**(10)"Finished"**该报文由客户端发送，这是第一个用Session Key加密的密文，内容为：
+**(10)"Finished"**该报文由客户端发送**mbedtls_ssl_write_finished()**，这是第一个用Session Key加密的密文，内容为：
 ```
 valid_data = PRF(master_secret, "client finished", MD5(handshake_messages) + SHA(handshake_messages))[0..11]
 ```
