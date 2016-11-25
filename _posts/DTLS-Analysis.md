@@ -81,24 +81,28 @@ DTLS握手协议和TLS类似。DTLS协议在UDP之上实现了客户机与服务
 简易握手流程图：
 ![](\DTLS-Analysis\dtls-handshake.png)
 
-从流程图上看，有(1)(3)两个"Client Hello"请求，他两之间的区别是第二个"Client Hello"包含有(2)"Hello Verify Request"里服务端发来的Cookie。要使得DTLS握手正真开始，服务端必须要判断发送请求的是有效的，正常的客户端。通过这样的Cookie交互，可以很大程度上保护服务端不受DoS的攻击。如果不这么做，服务端会在收到每个客户请求后返回一个体积大很多的证书给被攻击者，超大量证书有可能造成被攻击者的瘫痪。当首次建立连接时，(1)请求包中的cookie为空，服务端根据客户端的源IP地址通过哈希方法随机生成一个cookie，并填入(2)"Hello Verify Request"包中发送给客户端。客户端收到Cookie后，再次发送带有该Cookie的"Client Hello"包(3)，服务端收到该包后便检验报文段里面的cookie值和之前发给该客户端的Cookie值是否完全相同，若是，则通过Cookie验证，继续进行握手连接；若不是，则拒绝建立连接。所以说(1)(2)步骤只在第一次连接时发生，之后在Cookie有效的情况下，DTLS握手从步骤(3)开始。
+从流程图上看，有**(1)(3)**两个**"Client Hello"**请求，他两之间的区别是第二个包含有**(2)"Hello Verify Request"**里服务端发来的Cookie。要使得DTLS握手正真开始，服务端必须要判断发送请求的是有效的，正常的客户端。通过这样的Cookie交互，可以很大程度上保护服务端不受DoS的攻击。如果不这么做，服务端会在收到每个客户请求后返回一个体积大很多的证书给被攻击者，超大量证书有可能造成被攻击者的瘫痪。当首次建立连接时，**(1)**请求包中的cookie为空，服务端根据客户端的源IP地址通过哈希方法随机生成一个cookie，并填入**(2)"Hello Verify Request"**包中发送给客户端。客户端收到Cookie后，再次发送带有该Cookie的**"Client Hello"**包**(3)**，服务端收到该包后便检验报文段里面的cookie值和之前发给该客户端的Cookie值是否完全相同，若是，则通过Cookie验证，继续进行握手连接；若不是，则拒绝建立连接。所以说**(1)(2)**步骤只在第一次连接时发生，之后在Cookie有效的情况下，DTLS握手从步骤**(3)**开始。
 
 - 客户端的实现都在ssl_cli.c里，状态机由**mbedtls_ssl_handshake_client_step()**处理
 - 服务端的实现则在ssl_srv.c里，状态机由**mbedtls_ssl_handshake_server_step()**处理
 
-(3)"Client Hello"报文内容主要包含：
+**(3)"Client Hello"**由函数**ssl_write_client_hello()**实现报文填充和发送，内容主要包含：
 1. Random 32字节随机数，前4字节为当前时间+28字节随机数
 3. Cookie，从报文(2)中获得
 4. Cipher Suite，客户端可以支持的密钥交换方式
 5. Compression methods，是否压缩，及压缩方式
 6. Extension，例如服务器主机名，支持的签名加密方式，EC曲线的类型等
 
-由函数**ssl_write_client_hello()**实现报文填充和发送。
+服务端收到报文**(3)**后，会调用函数**ssl_parse_client_hello()**做一系列协商工作：
+将Random保存；验证Cookie是否和客户端的IP匹配；根据客户端提供的Cipher Suite找最佳匹配的能提供的Cipher算法集合（包括Session Key交换方式和加密方式）。mbedTLS的例子里使用了ECDHE_RSA_WITH_AES_256_GCM_SHA384。如果协商没有问题，服务端就调用**ssl_write_server_hello()**会发送报文**(4)"Server Hello"**，告诉客户端使用什么Cipher Suite做握手，什么压缩方式，并且会利用随机数生成一个Session ID。并且以客户端同样的方式生成的Random随机数，将随机数和Session ID放入报文中。
+紧接着服务端会接连发送报文**(5)(6)(7)**，将证书、生成Session Key的方法和参数发送给客户端。并用**(7)"Server Hello Done"**，告诉客户端Hello阶段结束。
 
-服务端收到报文(3)后，会调用函数**ssl_parse_client_hello()**做一系列协商工作：
-将Random保存；验证Cookie是否和客户端的IP匹配；根据客户端提供的Cipher Suite找最佳匹配的能提供的Cipher算法集合（包括Session Key交换方式和加密方式）。mbedTLS的例子里使用了ECDHE_RSA_WITH_AES_256_GCM_SHA384。如果协商没有问题，服务端就调用**ssl_write_server_hello()**会发送报文(4)"Server Hello"，告诉客户端使用什么Cipher Suite做握手，什么压缩方式，并且会利用随机数生成一个Session ID。并且以客户端同样的方式生成的Random随机数，将随机数和Session ID放入报文中。
-紧接着服务端会接连发送报文(5)(6)(7)，将证书、生成Session Key的方法和参数发送给客户端。并用(7)"Server Hello Done"，告诉客户端Hello阶段结束。(5)"Certification"比较简单，将Server。。。
-(6)"Server Key Exchange"
+**(5)"Certification"**服务端会将他自己的证书发送给客户端。证书中的肯定有一个证书的Subject是和Server Name相匹配的（commonName=localhost，organizationName="PolarSSL"）。测试程序中其实发送了3个证书，subject分别是localhost, PolarSSL Test CA及PolarSSL Test EC CA。PolarSSL Test CA实际上是localhost的父证书，这里就涉及到一个CA Chain的概念。现实情况中，服务器发给客户端的证书一般是终端用户证书（end-user CA），那么客户端怎么知道这个服务器是可信的？客户端必须在自己安装的一系列中间证书（intermediate CA）和根证书（ROOT CA）中查找终端用户证书的父证书，以及该父证书的父证书，直到根证书，建立起CA Chain。一般来讲，终端客户证书的Issuer都会和某个中间或者根证书的Subject相匹配，也就意味着客户证书是由某个中间或根证书发行机构签发，并且终端客户证书中的签名是由父证书拥有者的私钥加密的。所以客户端建立起CA Chain后，会首先使用父证书的公钥来验证终端用户证书的完整性，然后找到父证书的父证书，以同样的方式验证父证书完整性，直到遇到根证书。由于根证书的Subject和Issuer都是自己，所以客户端的根证书一定要保证是Trust CA颁发的，否则没有办法自己验证自己。
+![CA Chain](https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Chain_of_trust.svg/645px-Chain_of_trust.svg.png)
+
+回到我们的例子，客户端在初始化的时候加载了PolarSSL Test CA的根证书（当然只是测试的根证书），这个和现实的情况类似。所以客户端收到**(5)"Certification"**报文后，很快就可以查找到"localhost"这个终端用户证书的根证书是"PolarSSL Test CA"，一下边验证通过了。验证的代码在：**mbedtls_x509_crt_verify_with_profile()**。
+
+**(6)"Server Key Exchange"**
 
 
 
