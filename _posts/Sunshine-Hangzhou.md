@@ -14,6 +14,7 @@ published: true
 
 {% img http://ohx9w4r3g.bkt.clouddn.com/hangzhou1612/DSC_4119.jpg 640 %}
 
+
 你在寺庙里攀爬，看到了信徒们的虔诚
 
 {% img http://ohx9w4r3g.bkt.clouddn.com/hangzhou1612/DSC_4156.jpg 640 %}
@@ -24,13 +25,8 @@ published: true
 
 {% img http://ohx9w4r3g.bkt.clouddn.com/hangzhou1612/DSC_3920.jpg 640 %}
 
-{% img http://ohx9w4r3g.bkt.clouddn.com/hangzhou1612/DSC_3909.jpg 640 %}
-
-{% img http://ohx9w4r3g.bkt.clouddn.com/hangzhou1612/DSC_3909.jpg 640 %}
 
 你在满山茶园的景色中，第一次咬了棒棒糖
-
-{% img http://ohx9w4r3g.bkt.clouddn.com/hangzhou1612/DSC_4031.jpg 640 %}
 
 {% img http://ohx9w4r3g.bkt.clouddn.com/hangzhou1612/DSC_4036.jpg 640 %}
 
@@ -39,8 +35,10 @@ published: true
 
 {% img http://ohx9w4r3g.bkt.clouddn.com/hangzhou1612/DSC_4215.jpg 640 %}
 
-{% img http://ohx9w4r3g.bkt.clouddn.com/hangzhou1612/DSC_4258.jpg 640 %}
-
 ### 枫叶红了...你在慢慢长大 ###
 
 {% img http://ohx9w4r3g.bkt.clouddn.com/hangzhou1612/DSC_4295.jpg 640 %}
+
+<br>
+
+{% img http://ohx9w4r3g.bkt.clouddn.com/hangzhou1612/DSC_4177.jpg 640 %}
