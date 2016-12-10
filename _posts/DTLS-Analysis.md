@@ -36,6 +36,8 @@ mbedTLS（前身PolarSSL）是面向嵌入式系统，实现的一套易用的�
 ``` bash
 $git clone https://github.com/ARMmbed/mbedtls
 ```
+<!-- more -->
+
 
 ### 打开调试 ###
 

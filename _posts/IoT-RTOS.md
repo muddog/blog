@@ -43,6 +43,8 @@ IoT(Internet of Things)一直是个市场没爆发，但炒作够火的概念。
 
 Brillo需要跑在带MMU的AP上。其实很显然，Brillo基于Android，它再怎么裁剪，也是需要跑在Linux，Kernel上还要打一堆patch。只是它把Android上关于图形、JAVA虚拟机及Framework统统裁减掉。只保留了C/C++运行环境，Binder IPC，SSL等网络安全必须组件。这也就意味着在Brillo上开发APP其实是Native的，而且驱动程序都由Android的那套HAL来做抽象，所以应用程序是直接和HAL、Lib来打交道。
 
+<!-- more -->
+
 *Brillo 架构框图*
 ![brillo architecture](IoT-RTOS/brillo_arch.jpg)
 

@@ -1,6 +1,14 @@
 ---
-published: false
+title: 玩转mbedOS
+date: {}
+tags:
+- IoT
+- RTOS
+- mbedOS
+- mbed
+published: true
 ---
+
 # 引子 #
 
 mbedOS是ARM自己打造、主打IoT的一整套软件解决方案，是一个针对ARM CortexM系列处理器的嵌入式开源生态。详细的一些介绍可以参见我的另一篇文章[《IoT的那些操作系统》](http://muddog.pub/2016/11/12/IoT-RTOS/)
@@ -17,6 +25,8 @@ mbedOS支持三种开发工具：
 在线IDE编译很方便快捷，但没有调试功能。第三方的IDE都是可视化的，也没啥好介绍的。这里注重会来介绍mbed-cli，并且使用该命令行工具实现，项目导入、下载、编译、测试等等。
 
 mbed CLI is the name of the ARM mbed command line tool, packaged as mbed-cli, which enables the full mbed workflow: repositories version control, maintaining dependencies, publishing code, updating from remotely hosted repositories (GitHub, GitLab and mbed.org), and invoking ARM mbed’s own build system and export functions, among other operations.
+
+<!-- more -->
 
 # 编译系统及配置 #
 
