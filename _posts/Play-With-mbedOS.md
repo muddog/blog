@@ -16,6 +16,12 @@ mbedOS是ARM自己打造、主打IoT的一整套软件解决方案，是一个�
 
 # 搭建环境 #
 
+## 开发板 ##
+
+mbedOS的例子大部分都可以直接跑在NXP的FRDM-K64之上。板子可以在mbed上[直接买](https://developer.mbed.org/platforms/FRDM-K64F/)，或者去NXP的[官网](http://www.nxp.com/products/software-and-tools/hardware-development-tools/freedom-development-boards/freedom-development-platform-for-kinetis-k64-k63-and-k24-mcus:FRDM-K64F?fsrch=1&sr=1&pageNum=1)。觉得不方便，就淘宝咯。
+
+## 开发工具 ##
+
 mbedOS支持三种开发工具：
 
 1.在线IDE
@@ -25,9 +31,6 @@ mbedOS支持三种开发工具：
 在线IDE编译很方便快捷，但没有调试功能。第三方的IDE都是可视化的，也没啥好介绍的。这里注重会来介绍mbed-cli，官方的介绍是它的作用贯穿于整个mbed工作流：代码仓库版本控制、依赖管理、代码发布、从其他地方获取代码、调用编译系统及其他。本文会介绍如何利用mbed-cli来：项目导入、下载、编译、测试等等。
 可以这么说，mbed-cli和Android的repo有些类似。用过repo，那么你会很快熟悉mbed-cli。
 
-
-## mbed-cli安装及配置 ##
-
 无论你是用Windows还是Linux的主机，先准备好安装这四个工具：
 
 - Python - mbed CLI 是用Python写的，并且在 version 2.7.11 上做过完整测试，不兼容Python3.x.
@@ -35,6 +38,7 @@ mbedOS支持三种开发工具：
 - [Mercurial](https://www.mercurial-scm.org/) - version 2.2.2 or later
 - [GNU ARM](https://launchpad.net/gcc-arm-embedded) - ARM GCC交叉编译工具
 
+<!-- more -->
 如果你是跑在Windows上，建议使用Git-Bash。Cygwin在后期编译的时候arm-gcc会有路径错误问题。如果在Linux下，以上这些Git，Mercurial，GNUARM链接都是废话，直接仓库里下载吧。
 
 通过PyPi来安装mbed-cli：
@@ -47,7 +51,25 @@ $ pip install mbed-cli
 $ mbed config --global ARM_PATH "C:\Program Files\ARM"
 ```
 
-<!-- more -->
+## 调试工具 ##
+
+既然用了GNU的编译工具，GDB肯定是必不可少的调试工具。但是由于涉及到板子设备端的调试，我们还需要安装pyOCD。
+pyOCD是用Python将GDBServer协议和CMSIS-DAP的设备端调试机制集成在了一起，可以一边通过GDBServer接受GDB过来的调试请求，另一边将这些请求转换成CMSIS-DAP的SWD指令对设备端进行调试，见下图：
+![](https://docs.mbed.com/docs/debugging-on-mbed/en/latest/Debugging/Images/PyOCD1.png)
+
+CMSIS-DAP不多说了，基本你可以认为它是板载的调试器，用户不用购买JLINK那么贵的设备，插上USB线就可以调试板子（FRDM-K64也带了板载的CMSIS-DAP）。
+
+``` bash
+$ pip install --pre -U pyocd
+```
+
+## 其他 ##
+
+- 串口工具装一个，方便调试。Putty, minicom，串口调试助手等都可以。
+- mbed serial，Windows串口驱动（[下载页面](https://developer.mbed.org/handbook/Windows-serial-configuration) ），Linux不需要。
+
+
+# 编译系统及配置 #
 
 ## mbed-cli常用命令 ##
 
@@ -75,12 +97,6 @@ Commands:
     toolchain  Set or get default toolchain
 
 ```
-
-
-
-
-
-# 编译系统及配置 #
 
 ## 导入项目 ##
 
