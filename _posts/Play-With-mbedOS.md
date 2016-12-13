@@ -134,15 +134,36 @@ README.md
 对于硬件平台，target.打头的配置，可以在mbedOS的targets目录下找到：
 > mbed-os/targets/targets.json
 
+K64的配置：
+``` json
+    "K64F": {
+        "supported_form_factors": ["ARDUINO"],
+        "core": "Cortex-M4F",
+        "supported_toolchains": ["ARM", "GCC_ARM", "IAR"],
+        "extra_labels": ["Freescale", "KSDK2_MCUS", "FRDM", "KPSDK_MCUS", "KPSDK_CODE", "MCU_K64F"],
+        "is_disk_virtual": true,
+        "macros": ["CPU_MK64FN1M0VMD12", "FSL_RTOS_MBED"],
+        "inherits": ["Target"],
+        "detect_code": ["0240"],
+        "device_has": ["ANALOGIN", "ANALOGOUT", "ERROR_RED", "I2C", "I2CSLAVE", "INTERRUPTIN", "LOWPOWERTIMER", "PORTIN", "PORTINOUT", "PORTOUT", "PWMOUT", "RTC", "SERIAL", "SERIAL_FC", "SLEEP", "SPI", "SPISLAVE", "STDIO_MESSAGES", "STORAGE", "TRNG"],
+        "features": ["LWIP", "STORAGE"],
+        "release_versions": ["2", "5"],
+        "device_name": "MK64FN1M0xxx12"
+    },
+
+```
+
+"target.features_add"表明除了lwip, storage外，我们还需要使能mbedOS里的nanostack及6lowpan的路由功能。
+
 对于其他mbedOS相关的软件配置，例如mbed-mesh-api.打头的配置，可以在mesh网络的stack路径里找到：
 > mbed-os/features/nanostack/FEATURE_NANOSTACK/mbed-mesh-api/mbed_lib.json
 
 这些配置都最终会以宏的形式保存在BUILD/<target>/<toolchain>/mbed_config.h文件中。
 
-依赖则通过.lib文件来描述，.lib文件其实是一个txt文件，描述了依赖库的源码git url以及版本信息。mbed-os-example-client依赖于mbed Client客户端的应用（mbed_client.lib），依赖于mbedOS（mbed_os.lib 包括RTOS，驱动，网络协议栈），依赖于MCR20A的RF驱动（mcr20a-rf-driver.lib）。例如其中的mbed_os.lib内容如下：
+项目依赖则通过.lib文件来描述，.lib文件其实是一个txt文件，描述了依赖库的源码git url以及版本信息。mbed-os-example-client依赖于mbed Client客户端的应用（mbed_client.lib），依赖于mbedOS（mbed_os.lib 包括RTOS，驱动，网络协议栈），依赖于MCR20A的RF驱动（mcr20a-rf-driver.lib）。例如其中的mbed_os.lib内容如下：
 > https://github.com/ARMmbed/mbed-os/#d5de476f74dd4de27012eb74ede078f6330dfc3fe
 
-#号后面是commit id，指定版本。对于的目录则是源代码或者library。
+\#号后面是commit id，指定版本。对应的目录则是其源代码或者library。
 
 
 
