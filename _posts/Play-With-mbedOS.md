@@ -78,7 +78,7 @@ $ pip install --pre -U pyocd
 mbed-cli和Android的repo有些类似。用过repo，那么你会很快熟悉mbed-cli。
 如果你用过Makefile，那么mbed的思路有些不太一样。Makefile里可以规定当前项目的目标是什么，我要编译什么源文件，目标的依赖是什么，相对来说比较通用。mbed则比较特殊，这里简单描述下它对项目的组织方式，编译及依赖管理。
 
-拿mbed-os-example-client这个项目举个例子，这里列出主要的文件：
+拿mbed-os-example-client（https://github.com/ARMmbed/mbed-os-example-client） 这个项目举个例子，列出主要的文件：
 
 ``` bash
 main.cpp
@@ -98,38 +98,54 @@ README.md
 ....
 ```
 
-对于一个应用来说，有自己的源文件，放在顶层，例如main.cpp。然后通过mbed_app.json描述项目的基本信息：
+它有自己的源文件，放在顶层，main.cpp（当然你可以有很多个.cpp，mbed会帮你编译）。然后通过mbed_app.json描述项目的基本信息，应用的配置及目标系统的配置覆盖。怎么理解？我们先贴上mbed_app.json内容（省略了一部分）：
 
-依赖则通过.lib文件来描述，.lib文件其实是一个txt文件，比如mbed
-，比如mbed-os-example-client，依赖于mbed Client客户端的应用，依赖于mbedOS（包括RTOS，驱动，网络协议栈），依赖于MCR20A的RF驱动。
-
-
-## mbed-cli常用命令 ##
-
-``` bash
-Commands:
-
-    new        Create new mbed program or library
-    import     Import program from URL
-    add        Add library from URL
-    remove     Remove library
-    deploy     Find and add missing libraries
-    publish    Publish program or library
-    update     Update to branch, tag, revision or latest
-    sync       Synchronize library references
-    ls         View dependency tree
-    status     Show version control status
-
-    compile    Compile code using the mbed build tools
-    test       Find, build and run tests
-    export     Generate an IDE project
-    detect     Detect connected mbed targets/boards
-
-    config     Tool configuration
-    target     Set or get default target
-    toolchain  Set or get default toolchain
-
+``` json
+{
+    "config": {
+        "network-interface":{
+            "help": "options are ETHERNET,WIFI,MESH_LOWPAN_ND,MESH_THREAD",
+            "value": "ETHERNET"
+        },
+        "mesh_radio_type": {
+                "help": "options are ATMEL, MCR20",
+                "value": "MCR20"
+        },
+...
+    },
+    "target_overrides": {
+        "*": {
+            "target.features_add": ["NANOSTACK", "LOWPAN_ROUTER", "COMMON_PAL"],
+            "mbed-mesh-api.6lowpan-nd-channel-page": 0,
+            "mbed-mesh-api.6lowpan-nd-channel": 12,
+            "mbed-trace.enable": 0
+        },
+}
 ```
+
+**"config"** 对象里存放的是应用程序会使用到的配置，这些配置项最终会被mbed-cli转换成C语言里的宏，放到生成的mbed_config.h中，例如**"mesh_radio_type"**和**"network-interface"**，会被转换成：
+
+``` C
+#define MBED_CONF_APP_MESH_RADIO_TYPE  MCR20 
+#define MBED_CONF_APP_NETWORK_INTERFACE  ETHERNET
+```
+
+转换规则很简单，连接符-转换成下划线，小写变大写，加上"MBED_CONF_APP" 前缀。所以在你的应用程序中，可配置项不会像常用的项目那样给用户一个.h文件，定义一些宏，让用户直接修改。而是在源文件中直接使用宏，宏的定义交给.json配置文件去写。这样的好处是通过JSON格式，可配置项变的易读，而且不用用户去创建或者修改.h文件。下面的"target_overrides"比较特殊，其实是针对mbedOS依赖项目（mbed_os/）里的设备端的软硬件配置。基本每个项目都需要用到它去覆盖某些目标设备的配置，毕竟软件还是要跑在板子上的。"target_overrides"可以选择覆盖任意，比如"\*"，或者覆盖某个硬件平台配置，比如"K64"。那么这些被覆盖的配置原始定义在哪里呢？
+对于硬件平台，target.打头的配置，可以在mbedOS的targets目录下找到：
+> mbed-os/targets/targets.json
+
+对于其他mbedOS相关的软件配置，例如mbed-mesh-api.打头的配置，可以在mesh网络的stack路径里找到：
+> mbed-os/features/nanostack/FEATURE_NANOSTACK/mbed-mesh-api/mbed_lib.json
+
+这些配置都最终会以宏的形式保存在BUILD/<target>/<toolchain>/mbed_config.h文件中。
+
+依赖则通过.lib文件来描述，.lib文件其实是一个txt文件，描述了依赖库的源码git url以及版本信息。mbed-os-example-client依赖于mbed Client客户端的应用（mbed_client.lib），依赖于mbedOS（mbed_os.lib 包括RTOS，驱动，网络协议栈），依赖于MCR20A的RF驱动（mcr20a-rf-driver.lib）。例如其中的mbed_os.lib内容如下：
+> https://github.com/ARMmbed/mbed-os/#d5de476f74dd4de27012eb74ede078f6330dfc3fe
+
+#号后面是commit id，指定版本。对于的目录则是源代码或者library。
+
+
+
 
 
 ## 导入项目 ##
