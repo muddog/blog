@@ -76,7 +76,32 @@ $ pip install --pre -U pyocd
 # 编译系统及配置 #
 
 mbed-cli和Android的repo有些类似。用过repo，那么你会很快熟悉mbed-cli。
-如果你用过Makefile，那么mbed的思路有些不太一样。Makefile里可以规定当前项目下我要编译什么源文件，目标的依赖是什么，相对来说比较通用。mbed则比较特殊，讲下它的层次：
+如果你用过Makefile，那么mbed的思路有些不太一样。Makefile里可以规定当前项目的目标是什么，我要编译什么源文件，目标的依赖是什么，相对来说比较通用。mbed则比较特殊，这里简单描述下它对项目的组织方式，编译及依赖管理。
+
+拿mbed-os-example-client这个项目举个例子，这里列出主要的文件：
+
+``` bash
+main.cpp
+mbed_app.json
+mbed_client_config.h
+mbed-client/
+ - mbed_lib.json
+ - module.json
+ - ...
+mbed-client.lib
+mbed-os/
+mbed-os.lib
+mbedtls_mbed_client_config.h
+mcr20a-rf-driver/
+mcr20a-rf-driver.lib
+README.md
+....
+```
+
+对于一个应用来说，有自己的源文件，放在顶层，例如main.cpp。然后通过mbed_app.json描述项目的基本信息：
+
+依赖则通过.lib文件来描述，.lib文件其实是一个txt文件，比如mbed
+，比如mbed-os-example-client，依赖于mbed Client客户端的应用，依赖于mbedOS（包括RTOS，驱动，网络协议栈），依赖于MCR20A的RF驱动。
 
 
 ## mbed-cli常用命令 ##
