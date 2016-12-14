@@ -90,6 +90,7 @@ mbed-client/
  - ...
 mbed-client.lib
 mbed-os/
+ - targets/targets.json
 mbed-os.lib
 mbedtls_mbed_client_config.h
 mcr20a-rf-driver/
@@ -165,20 +166,27 @@ K64的配置：
 
 \#号后面是commit id，指定版本。对应的目录则是其源代码或者library。
 
+那么对于这些库library来讲，它的编译配置及库的基本信息mbed怎么得知？和应用程序类似，我们看到mbed-client下有两个文件：
+- module.json
+- mbed_lib.json
+第一个文件描述了该库的名字、版本、License、作者等等的基本信息，以及库所依赖的其他库版本。第二个文件则和应用程序的mbed_app.json一样，保存的编译配置。
+
 讲到这里，你应该可以理解mbed的编译配置环境了。接下来可以Hands-on了。
 
 
-# 开始动手 #
+# 动一动手 #
 
 ## 导入项目 ##
-
 
 ``` bash
 $ mbed import <url>
 ```
 
-和repo init + sync类似。URL可以是完整的git repo路径，如果只给项目名称，会直接从https://github.com/ARMmbed/ 里的项目。
-改命令会处理模块之间的依赖关系，会检查mbed_app.json配置。
+和repo init + sync类似。URL可以是完整的git repo路径，如果只给项目名称，会直接从https://github.com/ARMmbed/ 里的项目：
+``` bash
+$ mbed import mbed-os-example-client
+```
+该命令会处理模块之间的依赖关系，会检查mbed_app.json配置及.lib文件。确保所有依赖的项目源文件都被下载。
 
 
 ## 编译 ##
