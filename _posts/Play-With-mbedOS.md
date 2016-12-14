@@ -220,6 +220,25 @@ $ mbed compile -m K64 -t GCC_ARM
 
 ## 调试 ##
 
+前面的环境搭建里，安装好的pyOCD作为GDBServer，而GNU ARM Toolchain里的GDB则作为Client用来调试。
+
+### 打开调试选项 ###
+首先要把编译器的-g选项打开，将debug symbol编译进elf文件。那么mbedOS里提供了对应的toolchain配置profiles：
+``` bash
+$ mbed compile -c --profile mbed-os/tools/profiles/debug.json
+```
+这个debug.json里都是编译器选项，你可以按照自己的要求修改。编译结果：./BUILD/<target>/<toolchain>/<project>.elf
+
+### 启动GDBServer ###
+默认绑定本地3333端口
+```bash
+$ pyocd-gdbserver
+```
+
+### 调试 ###
+```bash
+$ arm-none-eabi-gdb.exe ./BUILD/K64F/GCC_ARM/mbed-os-example-client.elf
+```
 
 
 ## 测试 ##
