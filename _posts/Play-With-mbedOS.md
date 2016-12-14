@@ -52,7 +52,7 @@ $ pip install mbed-cli
 
 配置下GCC的路径（你安装GNU ARM的路径）：
 ``` bash
-$ mbed config --global ARM_PATH "C:\Program Files\ARM"
+$ mbed config --global GCC_ARM_PATH "C:\Program Files\ARM"
 ```
 
 ## 调试工具 ##
@@ -181,15 +181,25 @@ K64的配置：
 ``` bash
 $ mbed import <url>
 ```
-
 和repo init + sync类似。URL可以是完整的git repo路径，如果只给项目名称，会直接从https://github.com/ARMmbed/ 里的项目：
 ``` bash
 $ mbed import mbed-os-example-client
 ```
-该命令会处理模块之间的依赖关系，会检查mbed_app.json配置及.lib文件。确保所有依赖的项目源文件都被下载。
+该命令会处理模块之间的依赖关系，会检查mbed_app.json配置及.lib文件。确保所有依赖的项目源文件都被下载。如果你用git clone将mbed-os-example-client克隆下来，那么依赖库不会被同时下载，需要使用下面的命令：
+``` bash
+$ mbed deploy
+```
+
+## 创建新项目 ##
+``` bash
+$ mbed new my-mbed-app
+```
 
 
 ## 编译 ##
+``` bash
+$ mbed compile -m K64 -t GCC_ARM
+```
 
 ## 调试 ##
 
