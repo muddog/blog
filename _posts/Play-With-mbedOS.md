@@ -158,18 +158,20 @@ K64的配置：
 对于其他mbedOS相关的软件配置，例如mbed-mesh-api.打头的配置，可以在mesh网络的stack路径里找到：
 > mbed-os/features/nanostack/FEATURE_NANOSTACK/mbed-mesh-api/mbed_lib.json
 
-这些配置都最终会以宏的形式保存在BUILD/<target>/<toolchain>/mbed_config.h文件中。
+这些配置都最终会以宏的形式保存在BUILD/<target>/<toolchain>/mbed_config.h文件中。当然，你选用什么样的硬件target，是在编译器选择的。
 
 项目依赖则通过.lib文件来描述，.lib文件其实是一个txt文件，描述了依赖库的源码git url以及版本信息。mbed-os-example-client依赖于mbed Client客户端的应用（mbed_client.lib），依赖于mbedOS（mbed_os.lib 包括RTOS，驱动，网络协议栈），依赖于MCR20A的RF驱动（mcr20a-rf-driver.lib）。例如其中的mbed_os.lib内容如下：
 > https://github.com/ARMmbed/mbed-os/#d5de476f74dd4de27012eb74ede078f6330dfc3fe
 
 \#号后面是commit id，指定版本。对应的目录则是其源代码或者library。
 
+讲到这里，你应该可以理解mbed的编译配置环境了。接下来可以Hands-on了。
 
 
-
+# 开始动手 #
 
 ## 导入项目 ##
+
 
 ``` bash
 $ mbed import <url>
@@ -178,16 +180,14 @@ $ mbed import <url>
 和repo init + sync类似。URL可以是完整的git repo路径，如果只给项目名称，会直接从https://github.com/ARMmbed/ 里的项目。
 改命令会处理模块之间的依赖关系，会检查mbed_app.json配置。
 
+
 ## 编译 ##
 
-## 配置项目 ##
+## 调试 ##
 
 # 内核分析 #
 
-# 创建自己的App #
 
-## 编译App ##
-## 调试App ##
 
 
 # 总结 #
