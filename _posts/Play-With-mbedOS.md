@@ -197,11 +197,17 @@ $ mbed new my-mbed-app
 
 
 ## 编译 ##
+
+编译需要指定target及toolchain：
+
 ``` bash
 $ mbed compile -m K64 -t GCC_ARM
 ```
+指定一次即可，后面可以直接使用compile编译，如果需要clean build，加上-c
 
 ## 调试 ##
+
+## 测试 ##
 
 # 内核分析 #
 
