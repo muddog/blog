@@ -194,7 +194,20 @@ $ mbed deploy
 ``` bash
 $ mbed new my-mbed-app
 ```
+默认会生成并下载mbedOS这个依赖库，如果需要其他库，可以用下面的命令:
+``` bash
+$ mbed add <git repo url>
+```
+mbed会自动下载，保存在子目录下，并且帮你生产.lib文件。不需要这个依赖库时，可以使用remove命令删除.lib及源文件。通过以下命令可以查看当前项目的依赖关系：
+``` bash
+$ mbed ls
+my-mbed-app (None)
+|- mbed-client (203b74116e2e)
+|  |- mbed-client-classic (42f18d977122)
+|  `- mbed-client-mbed-tls (7e1b6d815038)
+`- mbed-os (d5de476f74dd)
 
+```
 
 ## 编译 ##
 
@@ -206,6 +219,8 @@ $ mbed compile -m K64 -t GCC_ARM
 指定一次即可，后面可以直接使用compile编译，如果需要clean build，加上-c
 
 ## 调试 ##
+
+
 
 ## 测试 ##
 
