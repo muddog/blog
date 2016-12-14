@@ -28,13 +28,11 @@ mbedOS的例子大部分都可以直接跑在NXP的FRDM-K64之上。
 ## 开发工具 ##
 
 mbedOS支持三种开发工具：
-
 1.在线IDE
 2.mbed CLI控制台
 3.第三方开发工具，如IAR，MDK
 
 在线IDE编译很方便快捷，但没有调试功能。第三方的IDE都是可视化的，也没啥好介绍的。这里注重会来介绍mbed-cli，官方的介绍是它的作用贯穿于整个mbed工作流：代码仓库版本控制、依赖管理、代码发布、从其他地方获取代码、调用编译系统及其他。本文会介绍如何利用mbed-cli来：项目导入、下载、编译、测试等等。
-
 无论你是用Windows还是Linux的主机，先准备好安装这四个工具：
 
 - Python - mbed CLI 是用Python写的，并且在 version 2.7.11 上做过完整测试，不兼容Python3.x.
@@ -155,11 +153,10 @@ K64的配置：
 ```
 
 "target.features_add"表明除了lwip, storage外，我们还需要使能mbedOS里的nanostack及6lowpan的路由功能。
-
 对于其他mbedOS相关的软件配置，例如mbed-mesh-api.打头的配置，可以在mesh网络的stack路径里找到：
 > mbed-os/features/nanostack/FEATURE_NANOSTACK/mbed-mesh-api/mbed_lib.json
 
-这些配置都最终会以宏的形式保存在BUILD/<target>/<toolchain>/mbed_config.h文件中。当然，你选用什么样的硬件target，是在编译器选择的。
+这些配置都最终会以宏的形式保存在BUILD/[target]/[toolchain]/mbed_config.h文件中。当然，你选用什么样的硬件target，是在编译器选择的。
 
 项目依赖则通过.lib文件来描述，.lib文件其实是一个txt文件，描述了依赖库的源码git url以及版本信息。mbed-os-example-client依赖于mbed Client客户端的应用（mbed_client.lib），依赖于mbedOS（mbed_os.lib 包括RTOS，驱动，网络协议栈），依赖于MCR20A的RF驱动（mcr20a-rf-driver.lib）。例如其中的mbed_os.lib内容如下：
 > https://github.com/ARMmbed/mbed-os/#d5de476f74dd4de27012eb74ede078f6330dfc3fe
@@ -169,10 +166,9 @@ K64的配置：
 那么对于这些库library来讲，它的编译配置及库的基本信息mbed怎么得知？和应用程序类似，我们看到mbed-client下有两个文件：
 - module.json
 - mbed_lib.json
+
 第一个文件描述了该库的名字、版本、License、作者等等的基本信息，以及库所依赖的其他库版本。第二个文件则和应用程序的mbed_app.json一样，保存的编译配置。
-
 讲到这里，你应该可以理解mbed的编译配置环境了。接下来可以Hands-on了。
-
 
 # 动一动手 #
 
@@ -227,7 +223,7 @@ $ mbed compile -m K64 -t GCC_ARM
 ``` bash
 $ mbed compile -c --profile mbed-os/tools/profiles/debug.json
 ```
-这个debug.json里都是编译器选项，你可以按照自己的要求修改。编译结果：./BUILD/<target>/<toolchain>/<project>.elf
+这个debug.json里都是编译器选项，你可以按照自己的要求修改。编译结果：./BUILD/[targe]>/[toolchain]/[project].elf
 
 ### 启动GDBServer ###
 默认绑定本地3333端口
@@ -240,11 +236,12 @@ $ pyocd-gdbserver
 $ arm-none-eabi-gdb.exe ./BUILD/K64F/GCC_ARM/mbed-os-example-client.elf
 ```
 
-
 ## 测试 ##
+
 
 # 内核分析 #
 
+mbedOS很有趣，从编写一个应用程序开始你会发现它和其他的RTOS有些不同。为啥它的main()函数里不需要做任何操作系统初始化，甚至板级初始化，亦或是建立其他进程？mbdOS的内核从CMSIS-RTOS衍生而来，为客户提供了最大程度上的Out of Box Experience的使用体验。它把操作系统、硬件初始化的一切都在main()之前做完了，而且main()其实就是一个单独的进程，很有趣吧！
 
 
 
