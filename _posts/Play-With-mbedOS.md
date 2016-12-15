@@ -305,8 +305,6 @@ wrote 65536 bytes from file mbed-os-example-clinet.bin in 3.757346s (17.033 KiB/
 
 接下来就可以用GDB的其他调试命令来调试了，这里就不多说。
 
-## 测试 ##
-
 
 # 内核分析 #
 
