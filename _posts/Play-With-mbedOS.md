@@ -55,15 +55,23 @@ $ mbed config --global GCC_ARM_PATH "C:\Program Files\ARM"
 
 ## 调试工具 ##
 
-既然用了GNU的编译工具，GDB肯定是必不可少的调试工具。但是由于涉及到板子设备端的调试，我们还需要安装pyOCD。
-pyOCD是用Python将GDBServer协议和CMSIS-DAP的设备端调试机制集成在了一起，可以一边通过GDBServer接受GDB过来的调试请求，另一边将这些请求转换成CMSIS-DAP的SWD指令对设备端进行调试，见下图：
+既然用了GNU的编译工具，GDB肯定是必不可少的调试工具。但是由于涉及到板子设备端的调试，我们还需要安装pyOCD或者OpenOCD。两者都是OCD - On Chip Debugger。都是将GDBServer协议和CMSIS-DAP的设备端调试机制集成在了一起，可以一边通过GDBServer接受GDB过来的调试请求，另一边将这些请求转换成CMSIS-DAP的SWD指令对设备端进行调试。CMSIS-DAP不多说了，基本你可以认为它是板载的调试器，用户不用购买JLINK那么贵的设备，插上USB线就可以调试板子（FRDM-K64也带了板载的CMSIS-DAP）。
+
+### pyOCD ###
+pyOCD是mbed官方提供的调试工具，使用Python开发，框架图如下：
 ![](https://docs.mbed.com/docs/debugging-on-mbed/en/latest/Debugging/Images/PyOCD1.png)
 
-CMSIS-DAP不多说了，基本你可以认为它是板载的调试器，用户不用购买JLINK那么贵的设备，插上USB线就可以调试板子（FRDM-K64也带了板载的CMSIS-DAP）。
+安装方法如下：
 
 ``` bash
 $ pip install --pre -U pyocd
 ```
+
+但是pyOCD有个最大的缺陷，monitor的命令非常少（只支持reset, init, halt），对于调试来说手段很有限。所以这里会比较推荐OpenOCD。
+
+### OpenOCD ###
+非常强大的开源OCD，支持的调试接口非常多，不局限于CMSIS-DAP，支持包括Jlink，OSBDM，ULINK，ST-LINK等等。简单的安装方式是下载GNU ARM Eclipse OCD包：https://github.com/gnuarmeclipse/openocd/releases 。如果从OpenOCD官网下载，你还需要编译源代码。
+
 
 ## 其他 ##
 
