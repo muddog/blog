@@ -234,15 +234,76 @@ $ mbed compile -c --profile mbed-os/tools/profiles/debug.json
 这个debug.json里都是编译器选项，你可以按照自己的要求修改。编译结果：./BUILD/[targe]>/[toolchain]/[project].elf
 
 ### 启动GDBServer ###
-默认绑定本地3333端口
-```bash
-$ pyocd-gdbserver
+
+这里只讲OpenOCD。pyOCD比较简单，但调试用起来很不爽。首先，我们要自己为FRDM-K64写一个openOCD配置脚本，默认的release里没有。首先跑到GNU ARM Eclipse OCD安装目录下，例如：/c/Program Files/GNU ARM Eclipse/OpenOCD/0.10.0-201610281609-dev。在scripts/board/下新建一个frdm-k64.cfg，内容如下：
+
+``` bash
+source [find interface/cmsis-dap.cfg]
+
+# increase working area to 16KB
+set WORKAREASIZE 0x4000
+
+# chip name
+set CHIPNAME MK64FN1M0VLL12
+
+reset_config srst_only
+
+source [find target/kx.cfg]
+
 ```
 
-### 调试 ###
-```bash
-$ arm-none-eabi-gdb.exe ./BUILD/K64F/GCC_ARM/mbed-os-example-client.elf
+然后启动OpenOCD GDBServer:
+
+``` bash
+$ bin/openocd.exe -f scripts/board/frdm-k64.cfg
 ```
+默认绑定本地3333端口
+
+
+### 调试 ###
+
+链接到GDBServer （3333端口）：
+``` bash
+$ arm-none-eabi-gdb.exe ./BUILD/K64F/GCC_ARM/mbed-os-example-client.elf
+GNU gdb (GNU Tools for ARM Embedded Processors) 7.6.0.20140228-cvs
+Copyright (C) 2013 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "--host=i686-w64-mingw32 --target=arm-none-eabi".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from D:\mcu\iot\mbed-os-example-client\BUILD\K64F\GCC_ARM\mbed-os-example-client.elf...done.
+
+(gdb) target remote localhost:3333
+
+```
+
+然后通过OpenOCD将程序烧入Flash：
+``` bash
+(gdb) mointor program mbed-os-example-clinet.bin
+(gdb) Undefined command: "mointor".  Try "help".
+monitor program mbed-os-example-clinet.bin
+MDM: Chip is unsecured. Continuing.
+MK64FN1M0VLL12.cpu: target state: halted
+target halted due to debug-request, current mode: Thread
+xPSR: 0x01000000 pc: 0x00000674 msp: 0x20030000
+** Programming Started **
+auto erase enabled
+Flash Configuration Field written.
+Reset or power off the device to make settings effective.
+wrote 65536 bytes from file mbed-os-example-clinet.bin in 3.757346s (17.033 KiB/s)
+** Programming Finished **
+```
+注意，这里的mbed-os-example-clinet.bin是同elf文件在编译时候一起生成的，你需要拷贝到跑openocd的目录下，否则会报错找不到文件。
+
+接着，reset target，让硬件重新复位：
+``` bash
+(gdb) monitor reset init
+```
+
+接下来就可以用GDB的其他调试命令来调试了，这里就不多说。
 
 ## 测试 ##
 
