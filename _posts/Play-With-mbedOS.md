@@ -322,6 +322,17 @@ extern "C" void software_init_hook(void)
 mbed_sdk_init()会调用Kinetis SDK里的BOARD_BootXXX()来根据板子的时钟设计来配置时钟。software_init_hook_rtos()则是真正操作系统初始化的地方：
 
 ``` C
+osThreadDef_t os_thread_def_main = {(os_pthread)pre_main, osPriorityNormal, 1U, sizeof(thread_stack_main), thread_stack_main};
+...
+
+void pre_main(void) {
+    singleton_mutex_id = osMutexCreate(osMutex(singleton_mutex));
+    malloc_mutex_id = osMutexCreate(osMutex(malloc_mutex));
+    env_mutex_id = osMutexCreate(osMutex(env_mutex));
+    __libc_init_array();
+    main(0, NULL);
+}
+
 __attribute__((naked)) void software_init_hook_rtos (void) {
   __asm (
     "bl   osKernelInitialize\n"
