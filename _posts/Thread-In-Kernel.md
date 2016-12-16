@@ -18,9 +18,9 @@ Linux 2.6.x kernel 加入了对POSIX标准线程的支持。而在应用层，�
 
 2.6.x kernel 里在进程管理上，使用了3个组的概念，它们分别是：组，线程组和会话组。普通的组，和传统的UNIX进程组概念一样：Modern Unix operating systems introduce the notion of process groups to represent a "job" abstraction。线程组则是新引入，支持POSIX标准的概念。会话组则和登陆终端有关。这些组关系紧密，并且会频繁的被kernel遍历查询，因此kernel引入一个hash表来连接这些组成员，以便快速的找到某个进程所属组的其他进程。一下是4个hash表的类型描述，不出意料，除了以上提到的3个组类型外，单个进程的pid也被加入到一个hash中。
 
-Table 3-5. The four hash tables and corresponding fields in the process descriptor
+**Table 3-5. The four hash tables and corresponding fields in the process descriptor**
 
-| Hash table type | Field name | Description ｜
+| Hash table type | Field name | Description |
 | --------------- | ------------| ------------- |
 | PIDTYPE_PID | pid | PID of the process |
 | PIDTYPE_TGID | tgid | PID of thread group leader process |
@@ -29,33 +29,17 @@ Table 3-5. The four hash tables and corresponding fields in the process descript
 
 为支持该hash的使用，每个进程上下文结构task_struct中就加入了pid结构数组 struct pid pids[4]，大小为4，正好是四种类型。pid结构如下：
 
-Table 3-6. The fields of the pid data
+**Table 3-6. The fields of the pid data structures **
+| Type | Name | Description |
+| ------| ---- | -----------|
+| int | nr | The PID number |
+| struct hlist_node | pid_chain | The links to the next and previous elements in the hash chain list |
+| struct list_head | pid_list | The head of the per-PID list |
 
-| structures | Type | Name | Description |
+- nr：进程id，但在TGID类型下，为thread group id
+- pid_chain：hash冲突项列表，就是同一hash值下不同元素链表
+- pid_list：连接同组内的进程
 
-int
-
-nr
-
-The PID number
-
-struct hlist_node
-
-pid_chain
-
-The links to the next and previous elements in the hash chain
-list
-
-struct list_head
-
-pid_list
-
-The head of the per-PID
-list
-
-nr：进程id，但在TGID类型下，为thread group id
-pid_chain：hash冲突项列表，就是同一hash值下不同元素链表
-pid_list：连接同组内的进程
 图1比较形象的描述了该hash。
 由此，kernel其实已经有thread的概念了。在POSIX标准中，同线程组中的所有线程必须对有效信号进行处理，kernel就可以通过tgid（thread group id）可以找到所有的相关线程，在SIGKILL/SIGSTOP之类的信号发送到每个线程，而无需应用层去一一处理。关于信号会在下面详细介绍。
 
