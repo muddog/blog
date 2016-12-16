@@ -349,4 +349,32 @@ __attribute__((naked)) void software_init_hook_rtos (void) {
 }
 ```
 
+software_init_hook_rtos首先调用osKernelInitialize()，它根据当前的CPU权限通过svc call或者直接调用svcKernelInitialize()：
+
+``` C
+osStatus svcKernelInitialize (void) {
+  if (!os_initialized) {
+    rt_sys_init();                              // RTX System Initialization
+  } 
+
+  os_tsk.run->prio = 255U;                      // Highest priority
+
+  if (os_initialized == 0U) {
+    // Create OS Timers resources (Message Queue & Thread)
+    osMessageQId_osTimerMessageQ = svcMessageCreate (&os_messageQ_def_osTimerMessageQ, NULL);
+    osThreadId_osTimerThread = svcThreadCreate(&os_thread_def_osTimerThread, NULL, NULL);
+    // Initialize thread mutex
+    osMutexId_osThreadMutex = osMutexCreate(osMutex(osThreadMutex));
+  }
+
+  sysThreadError(osOK);
+
+  os_initialized = 1U;
+  os_running = 0U;
+
+  return osOK;
+}
+
+```
+
 # 总结 #
