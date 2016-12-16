@@ -1,7 +1,7 @@
 ---
 published: true
 title: Android Recovery模式
-date: {}
+date: 2009-04-25T13:00:00.000Z
 Tags:
   - Android
   - Recovery mode
@@ -20,6 +20,8 @@ MAGIC KEY:
  - command == 'boot-recovery' → 启动recovery.img。recovery模式
  - command == 'update-radio/hboot' → 更新firmware（bootloader)
 4. 其他 → 启动boot.img
+
+<!-- more -->
 
 ### Recovery涉及到的其他系统及文件
 

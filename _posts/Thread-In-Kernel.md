@@ -1,6 +1,6 @@
 ---
 published: true
-date: {}
+date: 2007-01-07T13:00:00.000Z
 tags:
   - Linux
   - Thread
@@ -12,6 +12,7 @@ title: Thread supported in Kernel
 Linux 2.6.x kernel 加入了对POSIX标准线程的支持。而在应用层，有LinuxThread和NPTL两个不同的库，不过接口都一样，库名也都是pthread。LinuxThread是比较早的pthread实现，在glibc 2.2.x里都有集成；而NPTL(Native POSIX Thread Library)则是Linux 线程的一个新实现，它克服了 LinuxThreads的缺点，同时也符合 POSIX 的需求。与 LinuxThreads 相比，它在性能和稳定性方面都提供了重大的改进，一般都被包含在glibc 2.3.x里。以下是NPTL相对于LinuxThread实现的优点：
 1. NPTL没有使用管理线程。管理线程的一些需求，例如向作为进程一部分的所有线程发送终止信号，是并不需要的；因为内核本身就可以实现这些功能。内核还会处理每个
 线程堆栈所使用的内存的回收工作。它甚至还通过在清除父线程之前进行等待，从而实现对所有线程结束的管理，这样可以避免僵尸进程的问题。
+<!-- more -->
 2. 由于 NPTL 没有使用管理线程，因此其线程模型在 NUMA 和 SMP 系统上具有更好的可伸缩性和同步机制。
 3. 使用 NPTL 线程库与新内核实现，就可以避免使用信号来对线程进行同步了。为了这个目的，NPTL 引入了一种名为 futex 的新机制。futex 在共享内存区域上进行工作，因此可以在进程之间进行共享，这样就可以提供进程间 POSIX 同步机制。我们也可以在进程之间共享一个 futex。这种行为使得进程间同步成为可能。实际上，NPTL 包含了一个 PTHREAD_PROCESS_SHARED 宏，使得开发人员可以让用户级进程在不同进程的线程之间共享互斥锁。
 4. 由于 NPTL 是 POSIX 兼容的，因此它对信号的处理是按照每进程的原则进行的；getpid() 会为所有的线程返回相同的进程 ID。例如，如果发送了 SIGSTOP 信号，那么整个进程都会停止；使用 LinuxThreads，只有接收到这个信号的线程才会停止。这样可以在基于 NPTL 的应用程序上更好地利用调试器，例如 GDB。
@@ -36,11 +37,12 @@ Linux 2.6.x kernel 加入了对POSIX标准线程的支持。而在应用层，�
 为支持该hash的使用，每个进程上下文结构task_struct中就加入了pid结构数组 struct pid pids[4]，大小为4，正好是四种类型。pid结构如下：
 
 **Table 3-6. The fields of the pid data structures **
+
 | Type | Name | Description |
-| ------| ---- | -----------|
+| ---- | ---- | ----------- |
 | int | nr | The PID number |
-| struct hlist_node | pid_chain | The links to the next and previous elements in the hash chain list |
-| struct list_head | pid_list | The head of the per-PID list |
+| struct hlist\_node | pid\_chain | The links to the next and previous elements in the hash chain list |
+| struct list\_head | pid\_list | The head of the per-PID list |
 
 - nr：进程id，但在TGID类型下，为thread group id
 - pid_chain：hash冲突项列表，就是同一hash值下不同元素链表

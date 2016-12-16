@@ -1,7 +1,6 @@
 ---
 published: true
-date:
-  'Wed Mar 01 2006 18:00:00 GMT+0800 (China Standard Time)': null
+date: 2006-03-01T13:00:00.000Z
 tags:
   - Linux
   - Netfilter
@@ -11,7 +10,10 @@ title: 如何在kernel里发送RST包
 
 kernel里发送RST包比较麻烦，首先你需要构造一个skb就够（很害怕吧！呵呵），再次要填充skb->data。当然就是填充ip、tcp头了。第一步，我们可以偷懒，用先前接收到的skb（RST肯定是在接收到SYN，或者主动异常中止链接，之前对方的包已收到）做为蓝本来构造RST的skb，或者干脆就拿这个skb来用。在有netfilter的kernel里，最典范的代码应该在ipt_REJECT target中。以下摘录，并分析它：
 
+<!-- more -->
+
 ``` C
+
 static void send_reset(struct sk_buff *oldskb, int local)
 {
     struct sk_buff *nskb;
@@ -136,4 +138,5 @@ static void send_reset(struct sk_buff *oldskb, int local)
  free_nskb:
     kfree_skb(nskb);
 }
+
 ```

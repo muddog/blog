@@ -13,6 +13,8 @@ title: Linux Kernel Timekeeping
 kernel-2.6.22中的arm arch加入了对dynticks, clocksource/event支持. imx31的BSP在clock这里有一些改动. 找了些kernel clock及timer子系统近来的变化, 总结一下。
 一般来说Soft-Timer (timer wheel / hrtimer) 都是由Hardware-Timer(时钟中断之类)以及相关的clock source(e.g GPT in Soc)驱动, 所以我打算先从clock这层开始介绍, 接着是soft-timer, kernel timekeeping, 最后来看一些应用.
 
+<!-- more -->
+
 ## Clock Source
 
 clock source定义了一个clock device的基本属性及行为, 这些clock device一般都有计数, 定时, 产生中断能力, 比如GPT. 结构定义如下:

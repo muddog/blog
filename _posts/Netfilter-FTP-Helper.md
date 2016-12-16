@@ -1,7 +1,6 @@
 ---
 published: true
-date:
-  'Sat Nov 12 2005 22:41:34 GMT+0800 (China Standard Time)': null
+date: 2005-11-12T13:00:00.000Z
 tags:
   - Linux
   - Netfilter
@@ -15,7 +14,11 @@ netfilter hook将FTP控制连接加入到conntrack pool中，每一个在该conn
 
 **接下来就分析这些helper，expect函数**
 
+<!-- more -->
+
+
 ``` C
+
 // file: ip_conntrack_ftp.c
 // function: help
 
@@ -158,9 +161,11 @@ static int help(const struct iphdr *iph, size_t len,
        return NF_ACCEPT;
 
 }
+
 ```
 
 **Nat 在conntrack注册了一个期待连接信息后，调用help直接修改那个引起期待的数据包。将PORT及227(PASV回应)中的ip地址及port做NAT。**
+
 
 ``` C
 // file: ip_nat_ftp.c
@@ -243,9 +248,11 @@ static unsigned int help(struct ip_conntrack *ct,
        UNLOCK_BH(&ip_ftp_lock);
        return NF_ACCEPT;
 }
+
 ```
 
 **当第一个期待连接的数据包到来时，下面的expect函数被调用。该函数的作用和nat table中的target差不多。都是向nat core注册一个nat的ip_nat_multi_range结构。该结构就是nat所需的转换地址。**
+
 
 ``` C
 // file: ip_nat_ftp.c
@@ -329,4 +336,5 @@ ftp_nat_expected(struct sk_buff **pskb,
 
        return ip_nat_setup_info(ct, &mr, hooknum); /* 注册入nat core中 */
 }
+
 ```
