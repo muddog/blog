@@ -1,5 +1,5 @@
 ---
-published: false
+published: true
 title: Android Recovery模式
 date: {}
 Tags:
