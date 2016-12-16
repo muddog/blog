@@ -1,3 +1,14 @@
+---
+published: false
+date: 2006-03-02T12:11:34.000Z
+tags:
+  - Linux
+  - Netfilter
+  - Kernel
+  - Blocking
+  - Thread
+title: kernel中的阻塞与非阻塞/
+---
 
 “要效率，就用NON-BLOCK操作吧！”， 这大概是很多program，特别是玩网络的深信不移的话。那么kernel里是如何实现阻塞和非阻塞的呢？
 kernel里一般利用filp->f_flag中的O_NONBLOCK位，或者诸如release socket时利用的sock->sk->linger标志，来判断该操作是否可以阻塞。如果可以，则将进程设置成TASK_INTERRUPTIBLE 或者 TASK_UNINTERRUPTIBLE， 加入到该操作相关的等待队列，然后探测异步操作是否结束，如果操作结束，则该进程继续执行，否则schedule，阻塞自己。当阻塞的进程由于异步事件的到来而被唤醒时，再次判断操作是否完成，如果还未完成，继续schedule，否则，进程重新执行下去。
