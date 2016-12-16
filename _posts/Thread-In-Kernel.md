@@ -1,6 +1,6 @@
 ---
-published: false
-date: 2007-01-07T12:00:00.000Z
+published: true
+date: {}
 tags:
   - Linux
   - Thread
