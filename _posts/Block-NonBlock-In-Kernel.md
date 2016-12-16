@@ -7,7 +7,7 @@ tags:
   - Kernel
   - Blocking
   - Thread
-title: kernel中的阻塞与非阻塞/
+title: kernel中的阻塞与非阻塞
 ---
 
 “要效率，就用NON-BLOCK操作吧！”， 这大概是很多program，特别是玩网络的深信不移的话。那么kernel里是如何实现阻塞和非阻塞的呢？
