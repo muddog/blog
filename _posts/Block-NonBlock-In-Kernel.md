@@ -1,9 +1,8 @@
 ---
 published: true
-date: {}
+date: 2006-03-02T00:00:00.000Z
 tags:
   - Linux
-  - Netfilter
   - Kernel
   - Blocking
   - Thread
