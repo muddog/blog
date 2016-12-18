@@ -30,8 +30,7 @@ mbedOS支持三种开发工具：
 2.mbed CLI控制台
 3.第三方开发工具，如IAR，MDK
 
-在线IDE编译很方便快捷，但没有调试功能。第三方的IDE都是可视化的，也没啥好介绍的。这里注重会来介绍mbed-cli，官方的介绍是它的作用贯穿于整个mbed工作流：代码仓库版本控制、依赖管理、代码发布、从其他地方获取代码、调用编译系统及其他。本文会介绍如何利用mbed-cli来：项目导入、下载、编译、测试等等。
-无论你是用Windows还是Linux的主机，先准备好安装这四个工具：
+在线IDE编译很方便快捷，但没有调试功能。第三方的IDE都是可视化的，也没啥好介绍的。这里着重会来介绍mbed-cli，它的作用贯穿于整个mbed工作流：代码仓库版本控制、依赖管理、代码发布、从其他地方获取代码、调用编译系统及其他。无论你是用Windows还是Linux的主机，先准备好安装这四个工具：
 
 - Python - mbed CLI 是用Python写的，并且在 version 2.7.11 上做过完整测试，不兼容Python3.x.
 - [Git](https://git-scm.com/) - version 1.9.5 or later
@@ -68,7 +67,7 @@ $ pip install --pre -U pyocd
 但是pyOCD有个最大的缺陷，monitor的命令非常少（只支持reset, init, halt），对于调试来说手段很有限。所以这里会比较推荐OpenOCD。
 
 ### OpenOCD ###
-非常强大的开源OCD，支持的调试接口非常多，不局限于CMSIS-DAP，支持包括Jlink，OSBDM，ULINK，ST-LINK等等。简单的安装方式是下载GNU ARM Eclipse OCD包：https://github.com/gnuarmeclipse/openocd/releases 。如果从OpenOCD官网下载，你还需要编译源代码。
+非常强大的开源OCD，支持的调试接口非常多，不局限于CMSIS-DAP，还支持包括Jlink，OSBDM，ULINK，ST-LINK等等。简单的安装方式是下载GNU ARM Eclipse OCD包：https://github.com/gnuarmeclipse/openocd/releases 。如果从OpenOCD官网下载，你还需要编译源代码。
 
 
 ## 其他 ##
@@ -250,7 +249,7 @@ $ mbed compile -m K64 -t GCC_ARM
 ``` bash
 $ mbed compile -c --profile mbed-os/tools/profiles/debug.json
 ```
-这个debug.json里都是编译器选项，你可以按照自己的要求修改。编译结果：./BUILD/[targe]>/[toolchain]/[project].elf
+这个debug.json里都是编译器选项，你可以按照自己的要求修改。编译结果：./BUILD/[targe]/[toolchain]/[project].elf
 
 ### 启动GDBServer ###
 
