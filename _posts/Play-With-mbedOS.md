@@ -327,9 +327,50 @@ wrote 65536 bytes from file mbed-os-example-clinet.bin in 3.757346s (17.033 KiB/
 接下来就可以用GDB的其他调试命令来调试了，这里就不多说。
 
 
-# 常用API #
+# API介绍 #
 
-## 设备驱动API ##
+mbedOS的接口都是以C++的接口形式实现，也就是说对于某一类对象或者操作都会分装成类的形式。所以API都是以类函数和静态函数提供。当然重载的操作符Operator，例如=，()，+/-都是很常见的。非常直观的可以操作某些设备和对象。
 
-## 内核API ##
+mbedOS提供以下几种API：
+> - Task management: handling tasks and events in mbed OS.
+> - Inputs and outputs: analog, digital, bus, port, PwmOut and interrupts.
+> - Digital interfaces: serial, SPI, I2C and CAN.
+> - Communication: network sockets, Ethernet, WiFi and BLE.
+> - Security: working with mbed uVisor and mbed TLS in the context of mbed OS.
 
+## 任务管理
+- Thread任务管理类，进程间通讯类（互斥体 Mutex、信号量 Samaphore、信号 Signal、邮箱 Mail、队列 Queue），及RtosTimer内核时钟定时器类
+- EventLoop事件回环类，主要用途是使得中断触发的事件处理可以在用户上下文中执行，而不是在IRQ里占用大量资源。说白了，就是在IRQ里触发一个事件，将等待该事件队列中的任务唤醒，来处理事件。
+- Time日期时间类
+- Ticker周期性定时器类
+- TimeOut超时定时器类
+- Timer时间间隔计量类
+- Wait延时类（忙等待延时）
+
+## 输入、输出设备
+主要分为三类pin：模拟，数字和PWM。在实际的芯片上，你可以认为
+- AnalogIn是ADC采样类，AnalogOut是DAC模拟输出类
+- DigitalIn/Out是GPIO的输入输出类
+- BusIn/Out是自定义的一组GPIO操作的类
+- PortIn/Out则是对于某一组GPIO的所有组内的GPIO操作的类
+- PwmOut则是PWM模块的方波输出类
+- InterruptIn则是将GPIO配置成输入产生中断的类
+
+## 数字接口
+很简单，分成：
+- Serial, UART类
+- SPI/SPISlave 类
+- I2C/I2CSlave 类
+- CAN 类
+
+## 通讯
+- 网络Sockets接口，标准的Socket接口，只是以C++封装
+- 以太网接口，连接，获取MAC地址等的接口
+- WiFi接口，进行scan,连接到指定SSID等的接口
+- BLE接口，一套完整的BLE接口（https://docs.mbed.com/docs/mbed-os-api-reference/en/5.1/APIs/communication/ble/） 和上面的三类接口比起来相对独立。以太网、Wifi只是对网络设备的基本操作，之后都可以走socket做通讯。
+
+## 安全
+- mbed uVisor，利用MPU来创建沙箱保护memory map上的指定的内存、设备区域；利用Cortex的SVCall将操作系统、中断处理的权限提升。具体的还没研究。等下一篇内核分析吧。
+- mbed TLS，常用于嵌入式的TLS库（原PolarSSL）接口
+
+所有的这些API都可以在这里找到：[mbedOS API 参考手册](https://docs.mbed.com/docs/mbed-os-api-reference/en/5.3/)
