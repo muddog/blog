@@ -9,8 +9,6 @@ tags:
 published: true
 ---
 
-# 引子 #
-
 mbedOS是ARM自己打造、主打IoT的一整套软件解决方案，是一个针对ARM CortexM系列处理器的嵌入式开源生态。详细的一些介绍可以参见我的另一篇文章[《IoT的那些操作系统》](http://muddog.pub/2016/11/12/IoT-RTOS/)
 从日常的工作、及和其他支持部门的交流来看，mbedOS现在还处于成长和推广阶段，在国内正真使用的客户貌似还很少，国外确实有比较牛X的客户指名道姓需要NXP的硬件来支持mbedOS。本人还是比较看好mbed，毕竟亲爹是ARM，而且提供BLE，802.15.4，6LowPAN，Thread，驱动框架及RTOS等等丰富的软件解决方案。所以么，不要等客户培养起来了再去研究，早起的鸟儿有虫吃。
 
@@ -329,9 +327,9 @@ wrote 65536 bytes from file mbed-os-example-clinet.bin in 3.757346s (17.033 KiB/
 
 # API介绍 #
 
-mbedOS的接口都是以C++的接口形式实现，也就是说对于某一类对象或者操作都会分装成类的形式。所以API都是以类函数和静态函数提供。当然重载的操作符Operator，例如=，()，+/-都是很常见的。非常直观的可以操作某些设备和对象。
+mbedOS的接口都是以C++的接口形式实现，也就是说对于某一类对象或者操作都会封装成类。所以API都是以类函数和静态函数提供。当然重载的操作符Operator，例如=，()，+/-都是很常见的，它可以非常直观的操作设备和对象。
 
-mbedOS提供以下几种API：
+mbedOS提供以下几种类型的API：
 > - Task management: handling tasks and events in mbed OS.
 > - Inputs and outputs: analog, digital, bus, port, PwmOut and interrupts.
 > - Digital interfaces: serial, SPI, I2C and CAN.
@@ -364,12 +362,12 @@ mbedOS提供以下几种API：
 - CAN 类
 
 ## 通讯
-- 网络Sockets接口，标准的Socket接口，只是以C++封装
-- 以太网接口，连接，获取MAC地址等的接口
-- WiFi接口，进行scan,连接到指定SSID等的接口
-- BLE接口，一套完整的BLE接口（https://docs.mbed.com/docs/mbed-os-api-reference/en/5.1/APIs/communication/ble/） 和上面的三类接口比起来相对独立。以太网、Wifi只是对网络设备的基本操作，之后都可以走socket做通讯。
+- 网络Sockets，标准的Socket接口，只是以C++封装
+- 以太网，连接，获取MAC地址等的接口
+- WiFi，进行scan,连接到指定SSID等的接口
+- BLE，一套完整的BLE类接口（https://docs.mbed.com/docs/mbed-os-api-reference/en/5.1/APIs/communication/ble/） 和上面的三类接口比起来相对独立。以太网、Wifi只是对网络设备的基本操作，之后都可以走socket做通讯。
 
-## 安全
+## 安全（C接口）
 - mbed uVisor，利用MPU来创建沙箱保护memory map上的指定的内存、设备区域；利用Cortex的SVCall将操作系统、中断处理的权限提升。具体的还没研究。等下一篇内核分析吧。
 - mbed TLS，常用于嵌入式的TLS库（原PolarSSL）接口
 
