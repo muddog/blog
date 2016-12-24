@@ -1,6 +1,6 @@
 ---
-published: false
-date: 2016-12-24T22:00:00.000Z
+published: true
+date: {}
 tags:
   - Linux
   - Python
