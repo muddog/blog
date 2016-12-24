@@ -18,7 +18,7 @@ title: 找回豆芽保姆
 ## 硬件平台
 
 i.MX6D的开发板 + Temper1 USB温度传感器 + UVC摄像头 + USB红外控制器
-![](http://ww2.sinaimg.cn/mw690/62c2bccfjw1e1lzyl3xk6j.jpg)
+{% img http://ww2.sinaimg.cn/mw690/62c2bccfjw1e1lzyl3xk6j.jpg 640 %}
 
 ## 软件
 Ubuntu + Python + C
