@@ -10,14 +10,40 @@ title: Enable QT developement for i.MX6UL
 ---
 
 
-### Preparation
+## Environment
 
 - PC Host: x86_64 Ubuntu-16.10
 - Target: i.mx6ul 14x14 EVK with LCD pannel
 - Mico-SD card
 - Ethernet cable & USB cable for console & Power adapter
 
-### Install QTCreator & QT5.x
+## QT SDK
+
+QT one ecosystem provide SDK to build powerful, connected and beautiful applications that run on any screen and across any platform. Here for embedded development, we need the following tools:
+1. Qt Creator IDE
+2. Qt5.6 source code
+3. HOST build toolchain
+4. TARGET build toolchain
+
+Qt Creator is a cross-platform C++, JavaScript and QML integrated development environment which is part of the SDK for the Qt GUI Application development framework. It includes a visual debugger and an integrated GUI layout and forms designer. It can run on both Windows, MacOS and Linux, developer create a Qt application on PC HOST and debug the UI on HOST build with HOST toolchain firstly. When debug completed, developer could use TARGET toolchain to build the application, and deploy the binary to embedded system like i.MX6UL linux.
+
+The HOST toolchain would be downloaded with SDK, but the TARGET toolchain is downloaded by Yocto introduced below.
+
+### Setup Ubuntu
+
+GCC-6 has issue to build the host tools for Yocto
+
+``` bash
+$ sudo apt-get install gcc-5-base gcc-5-multilib
+```
+Install required packages:
+``` bash
+$ sudo apt-get install build-essential # for g++
+$ sudo apt-get install libfontconfig1  # for font config
+$ sudo apt-get install libglu1-mesa-dev # for HOST OpenGL
+```
+
+### Install Qt SDK
 
 Online or offline installer for Linux version can be found on:
 https://www.qt.io/download-open-source/#section-2
@@ -34,19 +60,15 @@ If you do not have a QT account, just create one. Otherwise login with your acco
 
 The **"Toolchain"** is used for HOST build for applications, which you can debug your application on HOST before deploy to target. The **"Source Components"** contains the opensource code of QT and many examples.
 
-### Ubuntu env
-
-GCC-6 has issue to build the host tools for Yocto
-
+After all the packages downloaded and installed, you can run the Qt Creator by:
 ``` bash
-$ sudo apt-get install gcc-5-base gcc-5-multilib
+$ <Qt install dir>/Tools/QtCreator/bin/qtcreator
 ```
-Install required packages:
-``` bash
-$ sudo apt-get install build-essential # for g++
-$ sudo apt-get install libfontconfig1  # for font config
-$ sudo apt-get install libglu1-mesa-dev # for HOST OpenGL
-```
+
+You would be able to open the examples in the Qt5.x source code and quickly use the HOST toolchain to build and run a example on PC.
+
+
+## i.MX6UL Yocto BSP
 
 ### Yocto build
 
