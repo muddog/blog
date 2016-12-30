@@ -9,8 +9,9 @@ tags:
 title: Enable QT developement for i.MX6UL
 ---
 
+Qt is a cross-platform application framework that is widely used for developing application software that can be run on various software and hardware platforms with little or no change in the underlying codebase, while still being a native application with native capabilities and speed. It is running in TV, Car, HMI, 3D Printer, almost covering all of the embedded areas. This document introduces how to setup the development environment to build Qt application, deploy to NXP's i.MX6UL EVK board, and run application on the Linux BSP.
 
-## Environment
+## Hardware Requirement
 
 - PC Host: x86_64 Ubuntu-16.10
 - Target: i.mx6ul 14x14 EVK with LCD pannel
