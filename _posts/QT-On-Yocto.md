@@ -1,6 +1,14 @@
 ---
-published: false
+published: true
+date: {}
+tags:
+  - QT
+  - Linux
+  - i.MX6
+  - Yocto
+title: Enable QT developement for i.MX6UL
 ---
+
 
 ### Preparation
 
@@ -41,6 +49,25 @@ $ sudo apt-get install libglu1-mesa-dev # for HOST OpenGL
 ```
 
 ### Yocto build
+
+Get the repo, this tool can be download from the following sites:
+- http://php.webtutor.pl/en/wp-content/uploads/2011/09/repo
+- https://dl-ssl.google.com/dl/googlesource/git-repo/repo
+- http://android.git.kernel.org/repo
+
+Please chose the workable one, for China user, the following is workable:
+
+``` bash
+$ curl http://php.webtutor.pl/en/wp-content/uploads/2011/09/repo > ~/repo
+$ chmod a+x ~/repo
+$ export PATH=$PATH:~/
+```
+
+Download FSL i.MX Yocto BSP:
+``` bash
+$ repo init -u git://git.freescale.com/imx/fsl-arm-yocto-bsp.git -b imx-4.1-krogo
+$ repo sync
+```
 
 Be careful, that the ${DISTRO} should be set to "fsl-imx-xwayland", not "fsl-imx-wayland", otherwise you can not get the qtwayland plugin and other components installed. Definitely you can change the conf/local.conf to add the qt plugin to "fsl-imx-wayland" DISTRO.
 
