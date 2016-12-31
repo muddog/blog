@@ -32,7 +32,7 @@ The HOST toolchain would be downloaded with SDK, but the TARGET toolchain is dow
 
 ### Setup Ubuntu
 
-GCC-6 has issue to build the host tools for Yocto
+The default GCC-6 on Ubuntu 16.10 has issue to build the lzop tools for Yocto, install the GCC-5 and create gcc/g++ link to GCC-5 under /usr/bin.
 
 ``` bash
 $ sudo apt-get install gcc-5-base gcc-5-multilib
@@ -105,4 +105,9 @@ Build the QT5 target toolchain, which would be used on the QTCreator to build an
 
 ``` bash
 $ bitbake meta-toolchain-qt5
+```
+
+Install the cross compile toolchain into HOST
+``` bash
+$ sh tmp/deploy/sdk/fsl-imx-xwayland-glibc-x86_64-meta-toolchain-qt5-cortexa7hf-neon-toolchain-4.1.15-2.0.1.sh
 ```
