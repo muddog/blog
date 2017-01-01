@@ -100,7 +100,32 @@ $ DISTRO=fsl-imx-xwayland MACHINE=imx6ulevk source fsl-setup-release.sh -b build
 ```
 
 **Add SFTP support**
-Qt Creator use the SFTP protocol to upload the target image file, so we have to install ssh-server-openssh package instead of dropbear into the target.
+Qt Creator use the SFTP protocol to upload the target image file, so we have to install ssh-server-openssh package instead of dropbear by change the .bb file:
+
+``` bash
+project sources/meta-fsl-bsp-release/
+diff --git a/imx/meta-sdk/recipes-fsl/images/fsl-image-validation-imx.bb b/imx/meta-sdk/recipes-fsl/images/fsl-image-validation-imx.bb
+index 8343223..9989f83 100644
+--- a/imx/meta-sdk/recipes-fsl/images/fsl-image-validation-imx.bb
++++ b/imx/meta-sdk/recipes-fsl/images/fsl-image-validation-imx.bb
+@@ -20,7 +20,7 @@ IMAGE_FEATURES += " \
+     splash \
+     nfs-server \
+     tools-debug \
+-    ssh-server-dropbear \
++    ssh-server-openssh \
+     tools-testapps \
+     hwcodecs \
+     ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', '', \
+@@ -40,4 +40,7 @@ CORE_IMAGE_EXTRA_INSTALL += " \
+     packagegroup-fsl-gstreamer1.0-full \
+     ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'weston-init', '', d)} \
+     ${@bb.utils.contains('DISTRO_FEATURES', 'x11 wayland', 'weston-xwayland xterm', '', d)} \
++    openssh \
++    openssh-sftp \
++    openssh-sftp-server \
+ "
+```
 
 **Build rootfs**
 
