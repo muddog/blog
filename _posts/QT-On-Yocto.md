@@ -86,16 +86,25 @@ $ chmod a+x ~/repo
 $ export PATH=$PATH:~/
 ```
 
-Download FSL i.MX Yocto BSP:
+**Download FSL i.MX Yocto BSP**
 ``` bash
 $ repo init -u git://git.freescale.com/imx/fsl-arm-yocto-bsp.git -b imx-4.1-krogo
 $ repo sync
 ```
 
+**Setup environment**
 Be careful, that the ${DISTRO} should be set to "fsl-imx-xwayland", not "fsl-imx-wayland", otherwise you can not get the qtwayland plugin and other components installed. Definitely you can change the conf/local.conf to add the qt plugin to "fsl-imx-wayland" DISTRO.
 
 ``` bash
 $ DISTRO=fsl-imx-xwayland MACHINE=imx6ulevk source fsl-setup-release.sh -b build
+```
+
+**Add SFTP support**
+Qt Creator use the SFTP protocol to upload the target image file, so we have to install ssh-server-openssh package instead of dropbear into the target.
+
+**Build rootfs**
+
+``` bash
 $ bitbake fsl-image-qt5
 ```
 
@@ -111,3 +120,5 @@ Install the cross compile toolchain into HOST
 ``` bash
 $ sh tmp/deploy/sdk/fsl-imx-xwayland-glibc-x86_64-meta-toolchain-qt5-cortexa7hf-neon-toolchain-4.1.15-2.0.1.sh
 ```
+
+
