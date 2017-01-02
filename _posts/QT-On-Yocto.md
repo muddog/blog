@@ -150,7 +150,39 @@ Build the QT5 target toolchain, which would be used on the QTCreator to build an
 $ bitbake meta-toolchain-qt5
 ```
 
+### Deploy SDcard image
+
+Deploy the rootfs, and install the cross compile toolchain, cross Qt5 library into HOST used by Qt Creator
+``` bash
+$ sh tmp/deploy/sdk/fsl-imx-xwayland-glibc-x86_64-meta-toolchain-qt5-cortexa7hf-neon-toolchain-4.1.15-2.0.1.sh
+```
+
+You will find the i.MX6UL uboot/zImage/rootfs(ext4)/sdcard image under: build/tmp/deploy/images/imx6ulevk/. Prepare your SD card, and use the following dd command to deploy whole images:
+``` bash
+$ sudo dd if=build/tmp/deploy/images/imx6ulevk/fsl-image-qt5-imx6ulevk.sdcard of=/dev/<sdcard dev>
+```
+
+The Qt5 cross compile tools are installed under: /opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/x86_64-pokysdk-linux/
+The target configuration files, includes and libs are under opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/cortexa7hf-neon-poky-linux-gnueabi/
+
+
+## Qt Creator configure
+
+Launch Qt Creator, create one project or use the example project and open it.
+
+### Configure the cross toolchain
+
+Open the "Build & Run" settings from [Menu] -> [Tools] -> [Options...].
+1. Add target Qt5 qmake (deploy before under /opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/x86_64-pokysdk-linux/usr/bin/qt5) in the tab of "Qt versions":
+
+![](http://ohx9w4r3g.bkt.clouddn.com/blog/qt/qt_versions.png)
+
+2. 
+
+### Qt mkspec
+
 Update the qmake.conf file under:**/opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/cortexa7hf-neon-poky-linux-gnueabi/usr/lib/qt5/mkspecs/linux-arm-gnueabi-g++/qmake.conf** to update the toolchain name (arm-poky-linux-gnueabi-), the --sysroot for linker, and the NEON VFP4 hardware float support (as the toolchain is built for hf). Without this update, the linked library can not be found and the link would failed due to different float-abi usage.
+
 ``` qmake
 @@ -1,5 +1,5 @@
  #
@@ -188,14 +220,28 @@ Update the qmake.conf file under:**/opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/c
 
 ```
 
-Deploy the rootfs, and install the cross compile toolchain, cross Qt5 library into HOST used by Qt Creator
-``` bash
-$ sh tmp/deploy/sdk/fsl-imx-xwayland-glibc-x86_64-meta-toolchain-qt5-cortexa7hf-neon-toolchain-4.1.15-2.0.1.sh
-```
+### Configure the remote device
 
-You will find the i.MX6UL uboot/zImage/rootfs(ext4)/sdcard image under: build/tmp/deploy/images/imx6ulevk/. Prepare your SD card, and use the following dd command to deploy whole images:
-``` bash
-$ sudo dd if=build/tmp/deploy/images/imx6ulevk/fsl-image-qt5-imx6ulevk.sdcard of=/dev/<sdcard dev>
-```
+Add one "Generic Linux" device for i.MX6UL EVK board. Input the correct IP address, SSH port and username. Click the "Test" button to test the connection between PC and EVK board.
 
+![](http://ohx9w4r3g.bkt.clouddn.com/blog/qt/devices.png)
+
+### .pro for build
+
+In your Qt Creator project, modify the [project].pro
+- Change the **target.path** to the target application location you want to download to the board.
+- Add three INCLUDEPATH env for target cross compile headers
+- Add macro defines for VFP and GL usage
+
+``` Makefile
+...
+target.path = /home/root/audiodevices
+INSTALLS += target
+...
+INCLUDEPATH += /opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/cortexa7hf-neon-poky-linux-gnueabi/usr/include/c++/5.3.0/
+INCLUDEPATH += /opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/cortexa7hf-neon-poky-linux-gnueabi/usr/include/c++/5.3.0/arm-poky-linux-gnueabi/
+INCLUDEPATH += /opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/cortexa7hf-neon-poky-linux-gnueabi/usr/include/
+
+DEFINES += __ARM_PCS_VFP QT_NO_OPENGL
+```
 
