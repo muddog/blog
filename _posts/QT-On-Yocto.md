@@ -251,7 +251,10 @@ Add one "Generic Linux" device for i.MX6UL EVK board. Input the correct IP addre
 
 After done above settings, the projects "Build & Run" configurations would be automatically generated. You can see in the "Run" the default deploy way is using the SFTP to upload image files which mentioned above why we need openssh-sftp-server installed into rootfs. One thing to update is the "Arguments" in the "Run settings", the "-platform wayland" should be added, as we use xwayland for Qt's backend.
 
+Build settings:
 ![](http://ohx9w4r3g.bkt.clouddn.com/blog/qt/build_settings.png)
+
+Run settings:
 ![](http://ohx9w4r3g.bkt.clouddn.com/blog/qt/run_settings.png)
 
 **.pro for build**
