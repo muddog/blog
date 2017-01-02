@@ -21,6 +21,7 @@ Qt is a cross-platform application framework that is widely used for developing 
 ## QT SDK
 
 QT one ecosystem provide SDK to build powerful, connected and beautiful applications that run on any screen and across any platform. Here for embedded development, we need the following tools:
+
 1. Qt Creator IDE
 2. Qt5.6 source code
 3. HOST build toolchain
@@ -162,8 +163,7 @@ You will find the i.MX6UL uboot/zImage/rootfs(ext4)/sdcard image under: build/tm
 $ sudo dd if=build/tmp/deploy/images/imx6ulevk/fsl-image-qt5-imx6ulevk.sdcard of=/dev/<sdcard dev>
 ```
 
-The Qt5 cross compile tools are installed under: /opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/x86_64-pokysdk-linux/
-The target configuration files, includes and libs are under opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/cortexa7hf-neon-poky-linux-gnueabi/
+The Qt5 cross compile tools are installed under: /opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/x86_64-pokysdk-linux/. The target configuration files, includes and libs are under opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/cortexa7hf-neon-poky-linux-gnueabi/
 
 
 ## Qt Creator configure
