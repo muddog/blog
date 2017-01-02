@@ -87,12 +87,14 @@ $ export PATH=$PATH:~/
 ```
 
 **Download FSL i.MX Yocto BSP**
+
 ``` bash
 $ repo init -u git://git.freescale.com/imx/fsl-arm-yocto-bsp.git -b imx-4.1-krogo
 $ repo sync
 ```
 
 **Setup environment**
+
 Be careful, that the ${DISTRO} should be set to "fsl-imx-xwayland", not "fsl-imx-wayland", otherwise you can not get the qtwayland plugin and other components installed. Definitely you can change the conf/local.conf to add the qt plugin to "fsl-imx-wayland" DISTRO.
 
 ``` bash
@@ -100,6 +102,7 @@ $ DISTRO=fsl-imx-xwayland MACHINE=imx6ulevk source fsl-setup-release.sh -b build
 ```
 
 **Add SFTP support**
+
 Qt Creator use the SFTP protocol to upload the target image file, so we have to install ssh-server-openssh package instead of dropbear by change the .bb file:
 
 ``` bash
@@ -117,14 +120,22 @@ index 8343223..9989f83 100644
      tools-testapps \
      hwcodecs \
      ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', '', \
-@@ -40,4 +40,7 @@ CORE_IMAGE_EXTRA_INSTALL += " \
-     packagegroup-fsl-gstreamer1.0-full \
-     ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'weston-init', '', d)} \
-     ${@bb.utils.contains('DISTRO_FEATURES', 'x11 wayland', 'weston-xwayland xterm', '', d)} \
-+    openssh \
-+    openssh-sftp \
-+    openssh-sftp-server \
+     
+
+project sources/meta-fsl-bsp-release/
+diff --git a/imx/meta-sdk/recipes-fsl/images/fsl-image-qt5-validation-imx.bb b/imx/meta-sdk/recipes-fsl/images/fsl-image-qt5-validation-imx.bb
+index 39c7841..2ab231d 100644
+--- a/imx/meta-sdk/recipes-fsl/images/fsl-image-qt5-validation-imx.bb
++++ b/imx/meta-sdk/recipes-fsl/images/fsl-image-qt5-validation-imx.bb
+@@ -45,4 +45,7 @@ QT5_IMAGE_INSTALL_remove = " packagegroup-qt5-webengine"
+ 
+ IMAGE_INSTALL += " \
+ ${QT5_IMAGE_INSTALL} \
++openssh \
++openssh-sftp \
++openssh-sftp-server \
  "
+
 ```
 
 **Build rootfs**
@@ -133,17 +144,58 @@ index 8343223..9989f83 100644
 $ bitbake fsl-image-qt5
 ```
 
-Then you will have the rootfs ready under build/tmp/sysrootfs/imx6ulevk/
-
 Build the QT5 target toolchain, which would be used on the QTCreator to build and deploy the QT application:
 
 ``` bash
 $ bitbake meta-toolchain-qt5
 ```
 
-Install the cross compile toolchain into HOST
+Update the qmake.conf file under:**/opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/cortexa7hf-neon-poky-linux-gnueabi/usr/lib/qt5/mkspecs/linux-arm-gnueabi-g++/qmake.conf** to update the toolchain name (arm-poky-linux-gnueabi-), the --sysroot for linker, and the NEON VFP4 hardware float support (as the toolchain is built for hf). Without this update, the linked library can not be found and the link would failed due to different float-abi usage.
+``` qmake
+@@ -1,5 +1,5 @@
+ #
+-# qmake configuration for building with arm-linux-gnueabi-g++
++# qmake configuration for building with arm-poky-linux-gnueabi-g++
+ #
+ 
+ MAKEFILE_GENERATOR      = UNIX
+@@ -11,14 +11,17 @@
+ include(../common/g++-unix.conf)
+ 
+ # modifications to g++.conf
+-QMAKE_CC                = arm-linux-gnueabi-gcc
+-QMAKE_CXX               = arm-linux-gnueabi-g++
+-QMAKE_LINK              = arm-linux-gnueabi-g++
+-QMAKE_LINK_SHLIB        = arm-linux-gnueabi-g++
++QMAKE_CC                = arm-poky-linux-gnueabi-gcc
++QMAKE_CXX               = arm-poky-linux-gnueabi-g++
++QMAKE_LINK              = arm-poky-linux-gnueabi-g++
++QMAKE_LINK_SHLIB        = arm-poky-linux-gnueabi-g++
++
++QMAKE_LFLAGS += --sysroot=/opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/cortexa7hf-neon-poky-linux-gnueabi -mfloat-abi=hard -mfpu=neon-vfpv4
++QMAKE_CXXFLAGS +=  -mfloat-abi=hard -mfpu=neon-vfpv4
+ 
+ # modifications to linux.conf
+-QMAKE_AR                = arm-linux-gnueabi-ar cqs
+-QMAKE_OBJCOPY           = arm-linux-gnueabi-objcopy
+-QMAKE_NM                = arm-linux-gnueabi-nm -P
+-QMAKE_STRIP             = arm-linux-gnueabi-strip
++QMAKE_AR                = arm-poky-linux-gnueabi-ar cqs
++QMAKE_OBJCOPY           = arm-poky-linux-gnueabi-objcopy
++QMAKE_NM                = arm-poky-linux-gnueabi-nm -P
++QMAKE_STRIP             = arm-poky-linux-gnueabi-strip
+ load(qt_config)
+
+```
+
+Deploy the rootfs, and install the cross compile toolchain, cross Qt5 library into HOST used by Qt Creator
 ``` bash
 $ sh tmp/deploy/sdk/fsl-imx-xwayland-glibc-x86_64-meta-toolchain-qt5-cortexa7hf-neon-toolchain-4.1.15-2.0.1.sh
+```
+
+You will find the i.MX6UL uboot/zImage/rootfs(ext4)/sdcard image under: build/tmp/deploy/images/imx6ulevk/. Prepare your SD card, and use the following dd command to deploy whole images:
+``` bash
+$ sudo dd if=build/tmp/deploy/images/imx6ulevk/fsl-image-qt5-imx6ulevk.sdcard of=/dev/<sdcard dev>
 ```
 
 
