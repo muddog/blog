@@ -200,9 +200,9 @@ Select the correct Compiler/Debugger/Qt version created above. And make sure the
 
 ### Qt mkspec
 
-Update the qmake.conf file under:**/opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/cortexa7hf-neon-poky-linux-gnueabi/usr/lib/qt5/mkspecs/linux-arm-gnueabi-g++/qmake.conf** to update the toolchain name (arm-poky-linux-gnueabi-), the --sysroot for linker, and the NEON VFP4 hardware float support (as the toolchain is built for hf). Without this update, the linked library can not be found and the link would failed due to different float-abi usage.
+Update the mksepc file: **/opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/cortexa7hf-neon-poky-linux-gnueabi/usr/lib/qt5/mkspecs/linux-arm-gnueabi-g++/qmake.conf** for the toolchain name (arm-poky-linux-gnueabi-), the --sysroot for linker, and the NEON VFP4 hardware float support (as the toolchain is built for hf). Without this update, the linked library can not be found and the link would failed due to different float-abi usage.
 
-``` qmake
+``` diff
 @@ -1,5 +1,5 @@
  #
 -# qmake configuration for building with arm-linux-gnueabi-g++
