@@ -26,7 +26,7 @@ QT one ecosystem provide SDK to build powerful, connected and beautiful applicat
 2. Qt5.6 source code
 3. HOST build toolchain
 4. TARGET build toolchain
-
+<!-- more -->
 Qt Creator is a cross-platform C++, JavaScript and QML integrated development environment which is part of the SDK for the Qt GUI Application development framework. It includes a visual debugger and an integrated GUI layout and forms designer. It can run on both Windows, MacOS and Linux, developer create a Qt application on PC HOST and debug the UI on HOST build with HOST toolchain firstly. When debug completed, developer could use TARGET toolchain to build the application, and deploy the binary to embedded system like i.MX6UL linux.
 
 The HOST toolchain would be downloaded with SDK, but the TARGET toolchain is downloaded by Yocto introduced below.
