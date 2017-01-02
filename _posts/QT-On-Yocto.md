@@ -256,7 +256,8 @@ After done above settings, the projects "Build & Run" configurations would be au
 
 **.pro for build**
 
-In your Qt Creator project, modify the [project].pro
+Modify the [project].pro file:
+
 - Change the **target.path** to the target application location you want to download to the board.
 - Add three INCLUDEPATH env for target cross compile headers
 - Add macro defines for VFP and GL usage
@@ -273,3 +274,4 @@ INCLUDEPATH += /opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/cortexa7hf-neon-poky-
 DEFINES += __ARM_PCS_VFP QT_NO_OPENGL
 ```
 
+Everythings is done here, now you can build, run and debug your QT applications on the i.MX6UL EVK board.
