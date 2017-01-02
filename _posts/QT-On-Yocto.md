@@ -106,7 +106,7 @@ $ DISTRO=fsl-imx-xwayland MACHINE=imx6ulevk source fsl-setup-release.sh -b build
 
 Qt Creator use the SFTP protocol to upload the target image file, so we have to install ssh-server-openssh package instead of dropbear by change the .bb file:
 
-``` bash
+``` diff
 project sources/meta-fsl-bsp-release/
 diff --git a/imx/meta-sdk/recipes-fsl/images/fsl-image-validation-imx.bb b/imx/meta-sdk/recipes-fsl/images/fsl-image-validation-imx.bb
 index 8343223..9989f83 100644
