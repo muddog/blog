@@ -173,11 +173,30 @@ Launch Qt Creator, create one project or use the example project and open it.
 ### Configure the cross toolchain
 
 Open the "Build & Run" settings from [Menu] -> [Tools] -> [Options...].
-1. Add target Qt5 qmake (deploy before under /opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/x86_64-pokysdk-linux/usr/bin/qt5) in the tab of "Qt versions":
+
+1) Add target Qt5 qmake (deploy before under /opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/x86_64-pokysdk-linux/usr/bin/qt5) in the tab of "Qt versions":
 
 ![](http://ohx9w4r3g.bkt.clouddn.com/blog/qt/qt_versions.png)
 
-2. 
+2) Add cross compile g++/gcc toolchain:
+
+- G++: /opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/x86_64-pokysdk-linux/usr/bin/arm-poky-linux-gnueabi/arm-poky-linux-gnueabi-g++
+- GCC: /opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/x86_64-pokysdk-linux/usr/bin/arm-poky-linux-gnueabi/arm-poky-linux-gnueabi-gcc
+
+![](http://ohx9w4r3g.bkt.clouddn.com/blog/qt/compilers.png)
+
+3) Add gdb host tool:
+
+/opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/x86_64-pokysdk-linux/usr/bin/arm-poky-linux-gnueabi/arm-poky-linux-gnueabi-gdb
+
+![](http://ohx9w4r3g.bkt.clouddn.com/blog/qt/debuggers.png)
+
+4) Add Target Kits under the "Kits" Tab:
+
+Select the correct Compiler/Debugger/Qt version created above. And make sure the "Qt mkspec" is set to **linux-arm-gnueabi-g++**
+
+![](http://ohx9w4r3g.bkt.clouddn.com/blog/qt/kits.png)
+
 
 ### Qt mkspec
 
@@ -226,7 +245,16 @@ Add one "Generic Linux" device for i.MX6UL EVK board. Input the correct IP addre
 
 ![](http://ohx9w4r3g.bkt.clouddn.com/blog/qt/devices.png)
 
-### .pro for build
+### Configure the project
+
+**Build & Run**
+
+After done above settings, the projects "Build & Run" configurations would be automatically generated. You can see in the "Run" the default deploy way is using the SFTP to upload image files which mentioned above why we need openssh-sftp-server installed into rootfs. One thing to update is the "Arguments" in the "Run settings", the "-platform wayland" should be added, as we use xwayland for Qt's backend.
+
+![](http://ohx9w4r3g.bkt.clouddn.com/blog/qt/build_settings.png)
+![](http://ohx9w4r3g.bkt.clouddn.com/blog/qt/run_settings.png)
+
+**.pro for build**
 
 In your Qt Creator project, modify the [project].pro
 - Change the **target.path** to the target application location you want to download to the board.
