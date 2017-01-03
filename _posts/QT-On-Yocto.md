@@ -277,4 +277,59 @@ INCLUDEPATH += /opt/fsl-imx-xwayland/4.1.15-2.0.1/sysroots/cortexa7hf-neon-poky-
 DEFINES += __ARM_PCS_VFP QT_NO_OPENGL
 ```
 
+## FAQ
+
+### Why touch is not work correctly?
+Please update the weston service init file to start touchscreen calibration process before first use:
+``` diff
+index b4092bb..0942515 100644
+--- a/imx/meta-bsp/recipes-graphics/wayland/weston-init/init
++++ b/imx/meta-bsp/recipes-graphics/wayland/weston-init/init
+@@ -8,6 +8,8 @@
+ # Default-Stop:      0 1 6
+ ### END INIT INFO
+ 
++WS_CALUDEV_FILE=/etc/udev/rules.d/20-touch.rules
++
+ if test -e /etc/default/weston ; then
+         . /etc/default/weston
+ fi
+@@ -30,6 +32,34 @@ done
+ case "$1" in
+   start)
+         weston-start -- $OPTARGS
++
++        # If there's no touchscreen device available, done
++        if [ ! -e /dev/input/touchscreen0 ] ; then
++            exit 0
++        fi
++
++        # If it was already calibrated, done
++        if [ -f "$WS_CALUDEV_FILE" ] ; then
++            exit 0
++        fi
++
++        # Run a calibration app and save output to udev rules
++        echo    "Calibrating touchscreen (first time only)"
++        echo
++        echo    "*** To continue, please complete the touchscreen calibration"
++        echo -n "*** by touching the crosshairs on the LCD screen"
++        sleep 1
++        CAL_VALUES=`weston-calibrator|cut -c21-`
++        echo 'SUBSYSTEM=="input", ENV{WL_CALIBRATION}="'$CAL_VALUES'"' > $WS_CALUDEV_FILE
++        echo "."
++
++        # Reload and re-run udev rules and restart weston
++        udevadm control --reload
++        udevadm trigger
++        killproc weston
++        sleep 2
++
++        weston-start -- $OPTARGS
+   ;;
+ 
+   stop)
+
+```
+
 Everythings is done here, now you can build, run and debug your QT applications on the i.MX6UL EVK board.
