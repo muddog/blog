@@ -25,35 +25,31 @@ i.MX6UL属于i.MX系列中相对低端的AP，528Mhz的主频（6ULL会有1GHz�
 ![](https://community.nxp.com/servlet/JiveServlet/downloadImage/102-333910-1-177984/screenshot-qrscanner.png)
 
 # 应用的实现
-Implementation
-To do camera preview and capture, you must think on the gstreamer first, which is easy use and has the acceleration pads which implemented by NXP for i.MX6UL. Yes, it's very easy for you to enable the preview in console like:
+
+## 思路
+做这种多媒体的应用，特别是和摄像头、视频显示相关的，你肯定会第一个想到使用Gstreamer。没错！其实一个简单的命令就可以验证你的思路。例如在6UL上做摄像头的预览(viewfinder)，并且用PXP做YUV->RGB的转换，及Scale：
+``` bash
 $ gst-launch-1.0 v4l2src device=/dev/video1 ! video/x-raw,format=YUY2,width=640,height=320 ! imxvideoconvert_pxp ! video/x-raw,format=RGB16 ! waylandsink
-It works under the i.MX6UL EVK, with PXP IP to do color space convert from YUY2 -> RGB16 acceleration, also the potential scaling of the image. The CPU loading of this is about 20-30%, but if you use the component of "videoconvert" to replace the "imxvideoconvert_pxp", we do CSC and scale by CPU, then the loading would increase to 50-60%. The "/dev/video1" is the device node for UVC camera, it may different in your environment.
-So our target is clear, create such pipeline (with PXP acceleration) in the QT application, and use a appsink to get preview images, do simple "sink" to one QWidget by drawing this image on the widget surface for preview (say every 50ms for 20fps). Then in other thread, we fetch the preview buffer in a fixed frequency (like every 0.5s), then feed it into the ZXing engine to decode the strings inside this image.
- 
-Here are the class created inside the source code:
-ScannerQWidgetSink
-It act as a gstreamer sink for preview rendering. Init the pipeline, create a timer with timeout every 50ms. In the timer handler, we use appsink to copy the camera buffer from gstreamer, and tell the ViewfinderWidget to do update (re-draw event).
-ViewfinderWidget
-This class inherit from the QWidget, which draw the preview buffer as a QImage onto it's own surface by using QPainter. The QImage is created at the very begining with the image buffer created by the ScannerQWidgetSink. Because QImage itself does not maintain the image buffer, so the buffer must be alive during it's usage. So we keep this buffer during the ScannerQWidgetSink life cycle, copy the appsink buffer from pipeline to it for preview.
-MainWindow
-Create main window, which does not have title bar and border. Start any animation for the red line scan bar. Create instance of DecoderThread and ScannerQWidgetSink. Setup and start them.
-DecoderThread
-A infinite loop, to wait for a available buffer released by the ScannerQWidgetSink every 0.5s. Copy the buffer data to it's own buffer (imgData) to avoid any change to the buffer by sink when doing decoding. Then feed this copy of buffer into ZXing engine to get decoder result. Then show on the QLabel.
- 
-Screenshot under wayland (weston) desktop:
+```
+
+CPU的loading大概在20-30%，但如果不用PXP做加速，那么loading大概在50-60%。所以肯定需要加速啦。但还有个问题，既然我们用了QT，QT是否有可以直接用的组件呢？查了下Qtmultimedia，有个QCamera类，底下的实现在Linux上是基于Gstreamer的，看似很美好啊，我们可以直接用QCamera么？答案是可以，但性能太差，待会儿会讲到。所以绕了这个弯路后，终于回到了原点，还是老老实实利用GStreamer的API来实现吧。Appsink可以将获取的摄像头桢数据传给应用程序，所以，我们的目标就是建立类似上面的pipeline，并把waylandsink替换成appsink。
+
+## 为什么不用QCamera
+
 
  
+## 代码分析
+
+代码很简单，实现几个类：
+-**ScannerQWidgetSink**
+利用Gst appsink实现一个做视频预览的sink。初始化Gstreamer pipeline，创建一个定时器，每隔一段时间（50ms）将从摄像头获取的桢，用appsink API拷贝到内部的buffer，并且通知做预览的Widget更新界面（ViewfinderWidget redraw）
+
+-**ViewfinderWidget**
+继承自QWidget，实现将appsink取来的桢打包成一个QImage实例，并且使用QPainter画到自己的surface上。
+
+-**MainWindow**
+主界面类，没有边框和标题栏，全屏。在界面左半边实例化了ViewfinderWidget，右边实例化一个QLabel来显示扫码结果。并且利用动画在预览Widget上绘制红色扫码线动画。
+
+-**DecoderThread**
+独立线程。等待ScannerQWidgetSink每0.5s释放一帧图像资源，然后将该数据拷贝到自己的buffer里，送给QZXing引擎做二维码解析。最后将结果显示在QLabel实例上。
  
-Customize
-Camera instance
-Now I use the UVC camera which pluged in the USB host, which device node is /dev/video1. If you want to use CSI or other device, please change the construction parameters for ScannerQWidgetSink():
-sink = new ScannerQWidgetSink(ui->widget, QString("v4l2src device=/dev/video1"));
-Image resolution captured and review
-Change the static member value of ScannerQWidgetSink class:
-uint ScannerQWidgetSink::CAPTURE_HEIGHT = 480;
-uint ScannerQWidgetSink::CAPTURE_WIDTH = 640;
-Preview fps and decoding frequency
-Find the "framerate=20/1" strings in the ScannerQWidgetSink::GstPipelineInit(), change to your fps. You also have to change the renderTimer start timeout value in the ::StartRender(). The decoding frequency is determined by renderCnt, which determine after how many preview frames showed to feed the decoder.
-Main window size
-It's fixed size of main window, you have to change the mainwindow.ui. It's easy to do in the QtCreate Designer.
