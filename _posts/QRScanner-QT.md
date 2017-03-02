@@ -51,4 +51,5 @@ CPU的loading大概在20-30%，但如果不用PXP做加速，那么loading大概
  
 ## 为什么不用QCamera
 
+QCamera用的是Gstreamer bad plugins里的camerabin2，这个BIN消耗的资源特别大，对于Preview，Image Capture，Video Recording各有三套不同的pipeline，还有一波proxy PAD，而且PAD都用的是纯软件的。光pipeline negoation就要花半天，更别说跑起来的速度，在没有PXP的加速下Preview CPU就要耗掉60-70%。我试图在Camerabin2的viewfinder pipeline里用imxvideoconvert_pxp替代videoconvert来加速CSC, Scale，但是始终会出错整个pipeline停止。这个问题找了我将近1个多礼拜。后来发现Qtmultimedia在处理非xcb的platform时候，不会用到Gstreamer内的sink来做显示加速。而使用自己写的qgstvideorendersink类来实现sink，可该sink有bug，会和需要render的widget不同步，导致自己报错。找了个workaround后，CPU loading降了下来，但后面image capture问题又来了，取一帧数据速度实在太慢，好几秒，根本无法接受。所以干脆放弃，还是直接自己建gst pipeline得了。
 
