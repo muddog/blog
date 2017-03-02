@@ -1,5 +1,5 @@
 ---
-published: false
+published: true
 date: {}
 tags:
   - Linux
