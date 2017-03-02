@@ -34,10 +34,6 @@ $ gst-launch-1.0 v4l2src device=/dev/video1 ! video/x-raw,format=YUY2,width=640,
 
 CPU的loading大概在20-30%，但如果不用PXP做加速，那么loading大概在50-60%。所以肯定需要加速啦。但还有个问题，既然我们用了QT，QT是否有可以直接用的组件呢？查了下Qtmultimedia，有个QCamera类，底下的实现在Linux上是基于Gstreamer的，看似很美好啊，我们可以直接用QCamera么？答案是可以，但性能太差，待会儿会讲到。所以绕了这个弯路后，终于回到了原点，还是老老实实利用GStreamer的API来实现吧。Appsink可以将获取的摄像头桢数据传给应用程序，所以，我们的目标就是建立类似上面的pipeline，并把waylandsink替换成appsink。
 
-## 为什么不用QCamera
-
-
- 
 ## 代码分析
 
 代码很简单，实现几个类：
@@ -53,3 +49,6 @@ CPU的loading大概在20-30%，但如果不用PXP做加速，那么loading大概
 -**DecoderThread**
 独立线程。等待ScannerQWidgetSink每0.5s释放一帧图像资源，然后将该数据拷贝到自己的buffer里，送给QZXing引擎做二维码解析。最后将结果显示在QLabel实例上。
  
+## 为什么不用QCamera
+
+
